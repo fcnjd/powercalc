@@ -1,0 +1,1 @@
+"""Powercalc package."""

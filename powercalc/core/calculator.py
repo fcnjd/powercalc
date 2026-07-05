@@ -1,0 +1,520 @@
+"""Safe expression parsing and evaluation for Powercalc."""
+
+from __future__ import annotations
+
+import ast
+from collections.abc import Callable
+from dataclasses import dataclass
+from typing import Literal
+
+import sympy as sp
+
+
+AngleUnit = Literal["radian", "degree", "gradian"]
+LogMode = Literal["calculator", "natural"]
+NumberDomain = Literal["complex", "real"]
+
+MAX_EXPRESSION_LENGTH = 500
+MAX_AST_NODES = 100
+MAX_AST_DEPTH = 40
+MAX_POWER_EXPONENT = 10000
+MAX_FACTORIAL_INPUT = 1000
+
+
+@dataclass(frozen=True)
+class EvaluationOptions:
+	"""Options controlling expression evaluation."""
+
+	decimal_precision: int = 12
+	number_domain: NumberDomain = "complex"
+	log_mode: LogMode = "calculator"
+	angle_unit: AngleUnit = "radian"
+
+
+@dataclass(frozen=True)
+class CalculationError:
+	"""User-facing calculation error with a stable machine code."""
+
+	code: str
+	message: str
+	position: int | None = None
+
+
+@dataclass(frozen=True)
+class CalculationResult:
+	"""Successful calculation result."""
+
+	input_text: str
+	normalized_text: str
+	exact_text: str
+	decimal_text: str
+	value: sp.Expr
+
+
+@dataclass(frozen=True)
+class CalculationOutcome:
+	"""Calculation outcome containing either a result or an error."""
+
+	ok: bool
+	result: CalculationResult | None = None
+	error: CalculationError | None = None
+
+
+class ExpressionError(Exception):
+	"""Internal parser/evaluator error converted to CalculationError."""
+
+	def __init__(
+		self,
+		code: str,
+		message: str,
+		position: int | None = None,
+	) -> None:
+		super().__init__(message)
+		self.error = CalculationError(code, message, position)
+
+
+def calculate(
+	expression: str,
+	options: EvaluationOptions | None = None,
+) -> CalculationOutcome:
+	"""Parse and evaluate a mathematical expression safely."""
+
+	options = options or EvaluationOptions()
+
+	try:
+		_validate_options(options)
+		normalized = _normalize_expression(expression)
+		parsed = ast.parse(normalized, mode="eval")
+		_check_ast_limits(parsed)
+		context = _EvaluationContext(options)
+		value = context.convert(parsed.body)
+		value = sp.simplify(value)
+		_validate_result(value, options)
+		result = CalculationResult(
+			input_text=expression,
+			normalized_text=normalized,
+			exact_text=str(value),
+			decimal_text=str(sp.N(value, options.decimal_precision)),
+			value=value,
+		)
+		return CalculationOutcome(ok=True, result=result)
+	except ExpressionError as exc:
+		return CalculationOutcome(ok=False, error=exc.error)
+	except (SyntaxError, ValueError, TypeError, RecursionError) as exc:
+		return CalculationOutcome(
+			ok=False,
+			error=CalculationError(
+				"INVALID_EXPRESSION",
+				f"Invalid expression: {exc}",
+			),
+		)
+
+
+def _validate_options(options: EvaluationOptions) -> None:
+	if options.decimal_precision < 1:
+		raise ExpressionError(
+			"INVALID_OPTION",
+			"Decimal precision must be at least 1.",
+		)
+	if options.number_domain not in {"complex", "real"}:
+		raise ExpressionError("INVALID_OPTION", "Unknown number domain.")
+	if options.log_mode not in {"calculator", "natural"}:
+		raise ExpressionError("INVALID_OPTION", "Unknown log mode.")
+	if options.angle_unit not in {"radian", "degree", "gradian"}:
+		raise ExpressionError("INVALID_OPTION", "Unknown angle unit.")
+
+
+def _normalize_expression(expression: str) -> str:
+	source = expression.strip()
+	if not source:
+		raise ExpressionError("EMPTY_EXPRESSION", "Expression is empty.")
+	if len(source) > MAX_EXPRESSION_LENGTH:
+		raise ExpressionError("EXPRESSION_TOO_LONG", "Expression is too long.")
+
+	source = source.replace("^", "**")
+	source = _replace_factorials(source)
+
+	if "!" in source:
+		raise ExpressionError(
+			"UNSUPPORTED_OPERATOR",
+			"The factorial operator is malformed.",
+		)
+
+	return source
+
+
+def _replace_factorials(source: str) -> str:
+	while True:
+		position = source.find("!")
+		if position == -1:
+			return source
+		if position + 1 < len(source) and source[position + 1] == "=":
+			raise ExpressionError(
+				"UNSUPPORTED_OPERATOR",
+				"The != operator is not supported.",
+				position,
+			)
+
+		operand_end = position
+		cursor = position - 1
+		while cursor >= 0 and source[cursor].isspace():
+			cursor -= 1
+		if cursor < 0:
+			raise ExpressionError(
+				"MALFORMED_FACTORIAL",
+				"Factorial requires a preceding value.",
+				position,
+			)
+
+		operand_start = _find_factorial_operand_start(source, cursor)
+		operand = source[operand_start:operand_end].rstrip()
+		if not operand:
+			raise ExpressionError(
+				"MALFORMED_FACTORIAL",
+				"Factorial requires a preceding value.",
+				position,
+			)
+
+		source = (
+			source[:operand_start]
+			+ f"factorial({operand})"
+			+ source[position + 1 :]
+		)
+
+
+def _find_factorial_operand_start(source: str, operand_end: int) -> int:
+	if source[operand_end] == ")":
+		open_index = _find_matching_open_parenthesis(source, operand_end)
+		name_start = _find_call_name_start(source, open_index)
+		return name_start if name_start is not None else open_index
+
+	cursor = operand_end
+	while cursor >= 0 and (
+		source[cursor].isalnum() or source[cursor] in {"_", "."}
+	):
+		cursor -= 1
+	return cursor + 1
+
+
+def _find_matching_open_parenthesis(source: str, close_index: int) -> int:
+	depth = 0
+	for index in range(close_index, -1, -1):
+		character = source[index]
+		if character == ")":
+			depth += 1
+		elif character == "(":
+			depth -= 1
+			if depth == 0:
+				return index
+	raise ExpressionError(
+		"MALFORMED_FACTORIAL",
+		"Factorial operand has unmatched parentheses.",
+		close_index,
+	)
+
+
+def _find_call_name_start(source: str, open_index: int) -> int | None:
+	cursor = open_index - 1
+	while cursor >= 0 and source[cursor].isspace():
+		cursor -= 1
+	if cursor < 0 or not (source[cursor].isalpha() or source[cursor] == "_"):
+		return None
+
+	while cursor >= 0 and (source[cursor].isalnum() or source[cursor] == "_"):
+		cursor -= 1
+	return cursor + 1
+
+
+def _check_ast_limits(node: ast.AST) -> None:
+	node_count = 0
+	stack: list[tuple[ast.AST, int]] = [(node, 1)]
+
+	while stack:
+		current, depth = stack.pop()
+		node_count += 1
+		if node_count > MAX_AST_NODES:
+			raise ExpressionError(
+				"EXPRESSION_TOO_COMPLEX",
+				"Expression contains too many parts.",
+			)
+		if depth > MAX_AST_DEPTH:
+			raise ExpressionError(
+				"EXPRESSION_TOO_DEEP",
+				"Expression nesting is too deep.",
+			)
+		for child in ast.iter_child_nodes(current):
+			stack.append((child, depth + 1))
+
+
+def _validate_result(value: sp.Expr, options: EvaluationOptions) -> None:
+	if value.has(sp.zoo, sp.nan):
+		raise ExpressionError(
+			"UNDEFINED_RESULT",
+			"Expression result is undefined.",
+		)
+	if options.number_domain == "real" and value.is_real is not True:
+		raise ExpressionError(
+			"NON_REAL_RESULT",
+			"Expression result is not real.",
+		)
+
+
+class _EvaluationContext:
+	def __init__(self, options: EvaluationOptions) -> None:
+		self.options = options
+		self.constants: dict[str, sp.Expr] = {
+			"pi": sp.pi,
+			"e": sp.E,
+			"tau": 2 * sp.pi,
+			"oo": sp.oo,
+			"i": sp.I,
+			"I": sp.I,
+		}
+
+	def convert(self, node: ast.AST) -> sp.Expr:
+		match node:
+			case ast.BinOp():
+				return self._convert_bin_op(node)
+			case ast.UnaryOp():
+				return self._convert_unary_op(node)
+			case ast.Call():
+				return self._convert_call(node)
+			case ast.Name():
+				return self._convert_name(node)
+			case ast.Constant():
+				return self._convert_constant(node)
+			case _:
+				raise ExpressionError(
+					"UNSUPPORTED_SYNTAX",
+					f"Unsupported syntax: {type(node).__name__}.",
+					getattr(node, "col_offset", None),
+				)
+
+	def _convert_bin_op(self, node: ast.BinOp) -> sp.Expr:
+		left = self.convert(node.left)
+		right = self.convert(node.right)
+
+		match node.op:
+			case ast.Add():
+				return left + right
+			case ast.Sub():
+				return left - right
+			case ast.Mult():
+				return left * right
+			case ast.Div():
+				return left / right
+			case ast.Mod():
+				return sp.Mod(left, right)
+			case ast.Pow():
+				self._check_power_exponent(right, node)
+				return left**right
+			case _:
+				raise ExpressionError(
+					"UNSUPPORTED_OPERATOR",
+					f"Unsupported operator: {type(node.op).__name__}.",
+					getattr(node, "col_offset", None),
+				)
+
+	def _convert_unary_op(self, node: ast.UnaryOp) -> sp.Expr:
+		operand = self.convert(node.operand)
+
+		match node.op:
+			case ast.UAdd():
+				return operand
+			case ast.USub():
+				return -operand
+			case _:
+				raise ExpressionError(
+					"UNSUPPORTED_OPERATOR",
+					f"Unsupported unary operator: {type(node.op).__name__}.",
+					getattr(node, "col_offset", None),
+				)
+
+	def _convert_call(self, node: ast.Call) -> sp.Expr:
+		if node.keywords:
+			raise ExpressionError(
+				"UNSUPPORTED_SYNTAX",
+				"Function keyword arguments are not supported.",
+				getattr(node, "col_offset", None),
+			)
+		if not isinstance(node.func, ast.Name):
+			raise ExpressionError(
+				"UNSUPPORTED_SYNTAX",
+				"Only named functions are supported.",
+				getattr(node, "col_offset", None),
+			)
+
+		function_name = node.func.id
+		args = [self.convert(arg) for arg in node.args]
+		return self._call_function(function_name, args, node)
+
+	def _convert_name(self, node: ast.Name) -> sp.Expr:
+		try:
+			return self.constants[node.id]
+		except KeyError as exc:
+			raise ExpressionError(
+				"UNKNOWN_NAME",
+				f"Unknown name: {node.id}.",
+				getattr(node, "col_offset", None),
+			) from exc
+
+	def _convert_constant(self, node: ast.Constant) -> sp.Expr:
+		value = node.value
+		if isinstance(value, bool):
+			raise ExpressionError(
+				"UNSUPPORTED_LITERAL",
+				"Boolean literals are not supported.",
+				getattr(node, "col_offset", None),
+			)
+		if isinstance(value, int):
+			return sp.Integer(value)
+		if isinstance(value, float):
+			return sp.Float(repr(value))
+		raise ExpressionError(
+			"UNSUPPORTED_LITERAL",
+			f"Unsupported literal: {type(value).__name__}.",
+			getattr(node, "col_offset", None),
+		)
+
+	def _call_function(
+		self,
+		name: str,
+		args: list[sp.Expr],
+		node: ast.Call,
+	) -> sp.Expr:
+		if name in {"sin", "cos", "tan"}:
+			self._require_arity(name, args, 1, node)
+			return _trig_function(name)(self._angle_to_radian(args[0]))
+		if name in {"asin", "acos", "atan"}:
+			self._require_arity(name, args, 1, node)
+			result = _inverse_trig_function(name)(args[0])
+			return self._angle_from_radian(result)
+		if name == "log":
+			return self._call_log(args, node)
+		if name == "ln":
+			self._require_arity(name, args, 1, node)
+			return sp.log(args[0])
+		if name == "log10":
+			self._require_arity(name, args, 1, node)
+			return sp.log(args[0], 10)
+		if name == "factorial":
+			self._require_arity(name, args, 1, node)
+			return _factorial(args[0], getattr(node, "col_offset", None))
+		if name in _SINGLE_ARGUMENT_FUNCTIONS:
+			self._require_arity(name, args, 1, node)
+			return _SINGLE_ARGUMENT_FUNCTIONS[name](args[0])
+		if name == "min":
+			self._require_at_least_one_arg(name, args, node)
+			return sp.Min(*args)
+		if name == "max":
+			self._require_at_least_one_arg(name, args, node)
+			return sp.Max(*args)
+
+		raise ExpressionError(
+			"UNKNOWN_FUNCTION",
+			f"Unknown function: {name}.",
+			getattr(node, "col_offset", None),
+		)
+
+	def _call_log(self, args: list[sp.Expr], node: ast.Call) -> sp.Expr:
+		if len(args) == 1:
+			if self.options.log_mode == "calculator":
+				return sp.log(args[0], 10)
+			return sp.log(args[0])
+		if len(args) == 2:
+			return sp.log(args[0], args[1])
+		raise ExpressionError(
+			"INVALID_ARGUMENT_COUNT",
+			"log expects 1 or 2 arguments.",
+			getattr(node, "col_offset", None),
+		)
+
+	def _angle_to_radian(self, value: sp.Expr) -> sp.Expr:
+		if self.options.angle_unit == "degree":
+			return value * sp.pi / 180
+		if self.options.angle_unit == "gradian":
+			return value * sp.pi / 200
+		return value
+
+	def _angle_from_radian(self, value: sp.Expr) -> sp.Expr:
+		if self.options.angle_unit == "degree":
+			return value * 180 / sp.pi
+		if self.options.angle_unit == "gradian":
+			return value * 200 / sp.pi
+		return value
+
+	def _require_arity(
+		self,
+		name: str,
+		args: list[sp.Expr],
+		expected: int,
+		node: ast.Call,
+	) -> None:
+		if len(args) != expected:
+			raise ExpressionError(
+				"INVALID_ARGUMENT_COUNT",
+				f"{name} expects {expected} argument.",
+				getattr(node, "col_offset", None),
+			)
+
+	def _require_at_least_one_arg(
+		self,
+		name: str,
+		args: list[sp.Expr],
+		node: ast.Call,
+	) -> None:
+		if not args:
+			raise ExpressionError(
+				"INVALID_ARGUMENT_COUNT",
+				f"{name} expects at least 1 argument.",
+				getattr(node, "col_offset", None),
+			)
+
+	def _check_power_exponent(self, exponent: sp.Expr, node: ast.BinOp) -> None:
+		if exponent.is_integer is True and exponent.is_number:
+			if abs(int(exponent)) > MAX_POWER_EXPONENT:
+				raise ExpressionError(
+					"EXPONENT_TOO_LARGE",
+					"Exponent is too large.",
+					getattr(node, "col_offset", None),
+				)
+
+
+def _trig_function(name: str) -> Callable[[sp.Expr], sp.Expr]:
+	return {"sin": sp.sin, "cos": sp.cos, "tan": sp.tan}[name]
+
+
+def _inverse_trig_function(name: str) -> Callable[[sp.Expr], sp.Expr]:
+	return {"asin": sp.asin, "acos": sp.acos, "atan": sp.atan}[name]
+
+
+def _factorial(value: sp.Expr, position: int | None) -> sp.Expr:
+	if value.is_integer is not True or value.is_nonnegative is not True:
+		raise ExpressionError(
+			"INVALID_FACTORIAL",
+			"Factorial requires a non-negative integer.",
+			position,
+		)
+	if value.is_number and int(value) > MAX_FACTORIAL_INPUT:
+		raise ExpressionError(
+			"FACTORIAL_TOO_LARGE",
+			"Factorial input is too large.",
+			position,
+		)
+	return sp.factorial(value)
+
+
+_SINGLE_ARGUMENT_FUNCTIONS: dict[str, Callable[[sp.Expr], sp.Expr]] = {
+	"sqrt": sp.sqrt,
+	"exp": sp.exp,
+	"abs": sp.Abs,
+	"floor": sp.floor,
+	"ceil": sp.ceiling,
+	"gamma": sp.gamma,
+	"re": sp.re,
+	"im": sp.im,
+	"sign": sp.sign,
+	"sinh": sp.sinh,
+	"cosh": sp.cosh,
+	"tanh": sp.tanh,
+}
