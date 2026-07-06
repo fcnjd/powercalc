@@ -5,6 +5,7 @@ from __future__ import annotations
 import ast
 from collections.abc import Callable
 from dataclasses import dataclass
+from enum import StrEnum
 from typing import Literal
 
 import sympy as sp
@@ -21,9 +22,51 @@ MAX_POWER_EXPONENT = 10000
 MAX_FACTORIAL_INPUT = 1000
 
 
+class CalculationErrorCode(StrEnum):
+	"""Stable machine-readable calculation error codes.
+
+	The enum values are English string identifiers intended for tests, GUI
+	mapping, logging, and future localization. User-facing layers should branch
+	on this enum instead of parsing the default English error message.
+	"""
+
+	EMPTY_EXPRESSION = "EMPTY_EXPRESSION"
+	EXPRESSION_TOO_LONG = "EXPRESSION_TOO_LONG"
+	EXPRESSION_TOO_COMPLEX = "EXPRESSION_TOO_COMPLEX"
+	EXPRESSION_TOO_DEEP = "EXPRESSION_TOO_DEEP"
+	INVALID_EXPRESSION = "INVALID_EXPRESSION"
+	INVALID_OPTION = "INVALID_OPTION"
+	INVALID_ARGUMENT_COUNT = "INVALID_ARGUMENT_COUNT"
+	UNKNOWN_NAME = "UNKNOWN_NAME"
+	UNKNOWN_FUNCTION = "UNKNOWN_FUNCTION"
+	UNSUPPORTED_SYNTAX = "UNSUPPORTED_SYNTAX"
+	UNSUPPORTED_OPERATOR = "UNSUPPORTED_OPERATOR"
+	UNSUPPORTED_LITERAL = "UNSUPPORTED_LITERAL"
+	MALFORMED_FACTORIAL = "MALFORMED_FACTORIAL"
+	INVALID_FACTORIAL = "INVALID_FACTORIAL"
+	FACTORIAL_TOO_LARGE = "FACTORIAL_TOO_LARGE"
+	EXPONENT_TOO_LARGE = "EXPONENT_TOO_LARGE"
+	UNDEFINED_RESULT = "UNDEFINED_RESULT"
+	NON_REAL_RESULT = "NON_REAL_RESULT"
+
+
 @dataclass(frozen=True)
 class EvaluationOptions:
-	"""Options controlling expression evaluation."""
+	"""Options controlling expression evaluation.
+
+	Attributes:
+		decimal_precision: Number of significant digits used for
+			``CalculationResult.decimal_text``. The default is 12.
+		number_domain: ``"complex"`` allows complex results; ``"real"``
+			rejects non-real results with ``NON_REAL_RESULT``. The default is
+			``"complex"``.
+		log_mode: ``"calculator"`` makes ``log(x)`` base 10; ``"natural"``
+			makes ``log(x)`` natural. ``ln(x)`` is always natural and
+			``log(x, base)`` always uses the explicit base.
+		angle_unit: ``"radian"``, ``"degree"``, or ``"gradian"``. The default
+			is ``"radian"``. The setting applies only to trigonometric and
+			inverse trigonometric functions.
+	"""
 
 	decimal_precision: int = 12
 	number_domain: NumberDomain = "complex"
@@ -33,16 +76,32 @@ class EvaluationOptions:
 
 @dataclass(frozen=True)
 class CalculationError:
-	"""User-facing calculation error with a stable machine code."""
+	"""Calculation failure details.
 
-	code: str
+	Attributes:
+		code: Stable machine-readable error code for branching, testing, and
+			future localization.
+		message: English default message suitable for early UI display.
+		position: Optional zero-based character offset when a useful source
+			position is available.
+	"""
+
+	code: CalculationErrorCode
 	message: str
 	position: int | None = None
 
 
 @dataclass(frozen=True)
 class CalculationResult:
-	"""Successful calculation result."""
+	"""Successful calculation result.
+
+	Attributes:
+		input_text: Original input string passed to ``calculate``.
+		normalized_text: Parser-normalized form, for diagnostics only.
+		exact_text: Exact SymPy text representation after simplification.
+		decimal_text: Decimal approximation using the selected precision.
+		value: Public SymPy expression for tests and future advanced features.
+	"""
 
 	input_text: str
 	normalized_text: str
@@ -51,13 +110,56 @@ class CalculationResult:
 	value: sp.Expr
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, init=False)
 class CalculationOutcome:
-	"""Calculation outcome containing either a result or an error."""
+	"""Calculation outcome containing either a result or an error.
+
+	Use ``CalculationOutcome.success(result)`` and
+	``CalculationOutcome.failure(error)`` to construct instances. Direct
+	construction is intentionally unsupported so the ``ok``, ``result``, and
+	``error`` invariants remain stable for GUI and service code.
+	"""
 
 	ok: bool
 	result: CalculationResult | None = None
 	error: CalculationError | None = None
+
+	def __init__(self, *args: object, **kwargs: object) -> None:
+		raise TypeError(
+			"Use CalculationOutcome.success() or CalculationOutcome.failure()."
+		)
+
+	@classmethod
+	def success(cls, result: CalculationResult) -> CalculationOutcome:
+		"""Create a successful outcome with a result and no error."""
+
+		return cls._create(ok=True, result=result, error=None)
+
+	@classmethod
+	def failure(cls, error: CalculationError) -> CalculationOutcome:
+		"""Create a failed outcome with an error and no result."""
+
+		return cls._create(ok=False, result=None, error=error)
+
+	@classmethod
+	def _create(
+		cls,
+		*,
+		ok: bool,
+		result: CalculationResult | None,
+		error: CalculationError | None,
+	) -> CalculationOutcome:
+		if ok:
+			if result is None or error is not None:
+				raise ValueError("Successful outcomes require only a result.")
+		elif error is None or result is not None:
+			raise ValueError("Failed outcomes require only an error.")
+
+		outcome = cls.__new__(cls)
+		object.__setattr__(outcome, "ok", ok)
+		object.__setattr__(outcome, "result", result)
+		object.__setattr__(outcome, "error", error)
+		return outcome
 
 
 class ExpressionError(Exception):
@@ -65,7 +167,7 @@ class ExpressionError(Exception):
 
 	def __init__(
 		self,
-		code: str,
+		code: CalculationErrorCode,
 		message: str,
 		position: int | None = None,
 	) -> None:
@@ -77,7 +179,18 @@ def calculate(
 	expression: str,
 	options: EvaluationOptions | None = None,
 ) -> CalculationOutcome:
-	"""Parse and evaluate a mathematical expression safely."""
+	"""Parse and evaluate a mathematical expression safely.
+
+	The input is parsed with Python's AST module and then converted through a
+	strict whitelist of supported nodes, operators, constants, and functions.
+	The function does not call Python ``eval`` and does not use SymPy string
+	parsers for user input.
+
+	Returns:
+		A successful ``CalculationOutcome`` with exact and decimal result text,
+		or a failed ``CalculationOutcome`` containing a ``CalculationError``.
+		This function never raises parser errors for normal invalid user input.
+	"""
 
 	options = options or EvaluationOptions()
 
@@ -97,46 +210,60 @@ def calculate(
 			decimal_text=str(sp.N(value, options.decimal_precision)),
 			value=value,
 		)
-		return CalculationOutcome(ok=True, result=result)
+		return CalculationOutcome.success(result)
 	except ExpressionError as exc:
-		return CalculationOutcome(ok=False, error=exc.error)
+		return CalculationOutcome.failure(exc.error)
 	except (SyntaxError, ValueError, TypeError, RecursionError) as exc:
-		return CalculationOutcome(
-			ok=False,
-			error=CalculationError(
-				"INVALID_EXPRESSION",
+		return CalculationOutcome.failure(
+			CalculationError(
+				CalculationErrorCode.INVALID_EXPRESSION,
 				f"Invalid expression: {exc}",
-			),
+			)
 		)
 
 
 def _validate_options(options: EvaluationOptions) -> None:
 	if options.decimal_precision < 1:
 		raise ExpressionError(
-			"INVALID_OPTION",
+			CalculationErrorCode.INVALID_OPTION,
 			"Decimal precision must be at least 1.",
 		)
 	if options.number_domain not in {"complex", "real"}:
-		raise ExpressionError("INVALID_OPTION", "Unknown number domain.")
+		raise ExpressionError(
+			CalculationErrorCode.INVALID_OPTION,
+			"Unknown number domain.",
+		)
 	if options.log_mode not in {"calculator", "natural"}:
-		raise ExpressionError("INVALID_OPTION", "Unknown log mode.")
+		raise ExpressionError(
+			CalculationErrorCode.INVALID_OPTION,
+			"Unknown log mode.",
+		)
 	if options.angle_unit not in {"radian", "degree", "gradian"}:
-		raise ExpressionError("INVALID_OPTION", "Unknown angle unit.")
+		raise ExpressionError(
+			CalculationErrorCode.INVALID_OPTION,
+			"Unknown angle unit.",
+		)
 
 
 def _normalize_expression(expression: str) -> str:
 	source = expression.strip()
 	if not source:
-		raise ExpressionError("EMPTY_EXPRESSION", "Expression is empty.")
+		raise ExpressionError(
+			CalculationErrorCode.EMPTY_EXPRESSION,
+			"Expression is empty.",
+		)
 	if len(source) > MAX_EXPRESSION_LENGTH:
-		raise ExpressionError("EXPRESSION_TOO_LONG", "Expression is too long.")
+		raise ExpressionError(
+			CalculationErrorCode.EXPRESSION_TOO_LONG,
+			"Expression is too long.",
+		)
 
 	source = source.replace("^", "**")
 	source = _replace_factorials(source)
 
 	if "!" in source:
 		raise ExpressionError(
-			"UNSUPPORTED_OPERATOR",
+			CalculationErrorCode.UNSUPPORTED_OPERATOR,
 			"The factorial operator is malformed.",
 		)
 
@@ -150,7 +277,7 @@ def _replace_factorials(source: str) -> str:
 			return source
 		if position + 1 < len(source) and source[position + 1] == "=":
 			raise ExpressionError(
-				"UNSUPPORTED_OPERATOR",
+				CalculationErrorCode.UNSUPPORTED_OPERATOR,
 				"The != operator is not supported.",
 				position,
 			)
@@ -161,7 +288,7 @@ def _replace_factorials(source: str) -> str:
 			cursor -= 1
 		if cursor < 0:
 			raise ExpressionError(
-				"MALFORMED_FACTORIAL",
+				CalculationErrorCode.MALFORMED_FACTORIAL,
 				"Factorial requires a preceding value.",
 				position,
 			)
@@ -170,7 +297,7 @@ def _replace_factorials(source: str) -> str:
 		operand = source[operand_start:operand_end].rstrip()
 		if not operand:
 			raise ExpressionError(
-				"MALFORMED_FACTORIAL",
+				CalculationErrorCode.MALFORMED_FACTORIAL,
 				"Factorial requires a preceding value.",
 				position,
 			)
@@ -207,7 +334,7 @@ def _find_matching_open_parenthesis(source: str, close_index: int) -> int:
 			if depth == 0:
 				return index
 	raise ExpressionError(
-		"MALFORMED_FACTORIAL",
+		CalculationErrorCode.MALFORMED_FACTORIAL,
 		"Factorial operand has unmatched parentheses.",
 		close_index,
 	)
@@ -234,12 +361,12 @@ def _check_ast_limits(node: ast.AST) -> None:
 		node_count += 1
 		if node_count > MAX_AST_NODES:
 			raise ExpressionError(
-				"EXPRESSION_TOO_COMPLEX",
+				CalculationErrorCode.EXPRESSION_TOO_COMPLEX,
 				"Expression contains too many parts.",
 			)
 		if depth > MAX_AST_DEPTH:
 			raise ExpressionError(
-				"EXPRESSION_TOO_DEEP",
+				CalculationErrorCode.EXPRESSION_TOO_DEEP,
 				"Expression nesting is too deep.",
 			)
 		for child in ast.iter_child_nodes(current):
@@ -249,12 +376,12 @@ def _check_ast_limits(node: ast.AST) -> None:
 def _validate_result(value: sp.Expr, options: EvaluationOptions) -> None:
 	if value.has(sp.zoo, sp.nan):
 		raise ExpressionError(
-			"UNDEFINED_RESULT",
+			CalculationErrorCode.UNDEFINED_RESULT,
 			"Expression result is undefined.",
 		)
 	if options.number_domain == "real" and value.is_real is not True:
 		raise ExpressionError(
-			"NON_REAL_RESULT",
+			CalculationErrorCode.NON_REAL_RESULT,
 			"Expression result is not real.",
 		)
 
@@ -285,7 +412,7 @@ class _EvaluationContext:
 				return self._convert_constant(node)
 			case _:
 				raise ExpressionError(
-					"UNSUPPORTED_SYNTAX",
+					CalculationErrorCode.UNSUPPORTED_SYNTAX,
 					f"Unsupported syntax: {type(node).__name__}.",
 					getattr(node, "col_offset", None),
 				)
@@ -310,7 +437,7 @@ class _EvaluationContext:
 				return left**right
 			case _:
 				raise ExpressionError(
-					"UNSUPPORTED_OPERATOR",
+					CalculationErrorCode.UNSUPPORTED_OPERATOR,
 					f"Unsupported operator: {type(node.op).__name__}.",
 					getattr(node, "col_offset", None),
 				)
@@ -325,7 +452,7 @@ class _EvaluationContext:
 				return -operand
 			case _:
 				raise ExpressionError(
-					"UNSUPPORTED_OPERATOR",
+					CalculationErrorCode.UNSUPPORTED_OPERATOR,
 					f"Unsupported unary operator: {type(node.op).__name__}.",
 					getattr(node, "col_offset", None),
 				)
@@ -333,13 +460,13 @@ class _EvaluationContext:
 	def _convert_call(self, node: ast.Call) -> sp.Expr:
 		if node.keywords:
 			raise ExpressionError(
-				"UNSUPPORTED_SYNTAX",
+				CalculationErrorCode.UNSUPPORTED_SYNTAX,
 				"Function keyword arguments are not supported.",
 				getattr(node, "col_offset", None),
 			)
 		if not isinstance(node.func, ast.Name):
 			raise ExpressionError(
-				"UNSUPPORTED_SYNTAX",
+				CalculationErrorCode.UNSUPPORTED_SYNTAX,
 				"Only named functions are supported.",
 				getattr(node, "col_offset", None),
 			)
@@ -353,7 +480,7 @@ class _EvaluationContext:
 			return self.constants[node.id]
 		except KeyError as exc:
 			raise ExpressionError(
-				"UNKNOWN_NAME",
+				CalculationErrorCode.UNKNOWN_NAME,
 				f"Unknown name: {node.id}.",
 				getattr(node, "col_offset", None),
 			) from exc
@@ -362,7 +489,7 @@ class _EvaluationContext:
 		value = node.value
 		if isinstance(value, bool):
 			raise ExpressionError(
-				"UNSUPPORTED_LITERAL",
+				CalculationErrorCode.UNSUPPORTED_LITERAL,
 				"Boolean literals are not supported.",
 				getattr(node, "col_offset", None),
 			)
@@ -371,7 +498,7 @@ class _EvaluationContext:
 		if isinstance(value, float):
 			return sp.Float(repr(value))
 		raise ExpressionError(
-			"UNSUPPORTED_LITERAL",
+			CalculationErrorCode.UNSUPPORTED_LITERAL,
 			f"Unsupported literal: {type(value).__name__}.",
 			getattr(node, "col_offset", None),
 		)
@@ -411,7 +538,7 @@ class _EvaluationContext:
 			return sp.Max(*args)
 
 		raise ExpressionError(
-			"UNKNOWN_FUNCTION",
+			CalculationErrorCode.UNKNOWN_FUNCTION,
 			f"Unknown function: {name}.",
 			getattr(node, "col_offset", None),
 		)
@@ -424,7 +551,7 @@ class _EvaluationContext:
 		if len(args) == 2:
 			return sp.log(args[0], args[1])
 		raise ExpressionError(
-			"INVALID_ARGUMENT_COUNT",
+			CalculationErrorCode.INVALID_ARGUMENT_COUNT,
 			"log expects 1 or 2 arguments.",
 			getattr(node, "col_offset", None),
 		)
@@ -452,7 +579,7 @@ class _EvaluationContext:
 	) -> None:
 		if len(args) != expected:
 			raise ExpressionError(
-				"INVALID_ARGUMENT_COUNT",
+				CalculationErrorCode.INVALID_ARGUMENT_COUNT,
 				f"{name} expects {expected} argument.",
 				getattr(node, "col_offset", None),
 			)
@@ -465,7 +592,7 @@ class _EvaluationContext:
 	) -> None:
 		if not args:
 			raise ExpressionError(
-				"INVALID_ARGUMENT_COUNT",
+				CalculationErrorCode.INVALID_ARGUMENT_COUNT,
 				f"{name} expects at least 1 argument.",
 				getattr(node, "col_offset", None),
 			)
@@ -474,7 +601,7 @@ class _EvaluationContext:
 		if exponent.is_integer is True and exponent.is_number:
 			if abs(int(exponent)) > MAX_POWER_EXPONENT:
 				raise ExpressionError(
-					"EXPONENT_TOO_LARGE",
+					CalculationErrorCode.EXPONENT_TOO_LARGE,
 					"Exponent is too large.",
 					getattr(node, "col_offset", None),
 				)
@@ -491,13 +618,13 @@ def _inverse_trig_function(name: str) -> Callable[[sp.Expr], sp.Expr]:
 def _factorial(value: sp.Expr, position: int | None) -> sp.Expr:
 	if value.is_integer is not True or value.is_nonnegative is not True:
 		raise ExpressionError(
-			"INVALID_FACTORIAL",
+			CalculationErrorCode.INVALID_FACTORIAL,
 			"Factorial requires a non-negative integer.",
 			position,
 		)
 	if value.is_number and int(value) > MAX_FACTORIAL_INPUT:
 		raise ExpressionError(
-			"FACTORIAL_TOO_LARGE",
+			CalculationErrorCode.FACTORIAL_TOO_LARGE,
 			"Factorial input is too large.",
 			position,
 		)

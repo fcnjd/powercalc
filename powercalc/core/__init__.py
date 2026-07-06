@@ -2,6 +2,7 @@
 
 from powercalc.core.calculator import (
 	CalculationError,
+	CalculationErrorCode,
 	CalculationOutcome,
 	CalculationResult,
 	EvaluationOptions,
@@ -10,6 +11,7 @@ from powercalc.core.calculator import (
 
 __all__ = [
 	"CalculationError",
+	"CalculationErrorCode",
 	"CalculationOutcome",
 	"CalculationResult",
 	"EvaluationOptions",

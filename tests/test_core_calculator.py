@@ -1,6 +1,14 @@
+import pytest
 import sympy as sp
 
-from powercalc.core import EvaluationOptions, calculate
+from powercalc.core import (
+	CalculationError,
+	CalculationErrorCode,
+	CalculationOutcome,
+	CalculationResult,
+	EvaluationOptions,
+	calculate,
+)
 
 
 def assert_ok(expression, options=None):
@@ -13,7 +21,9 @@ def assert_ok(expression, options=None):
 def assert_error(expression, code=None, options=None):
 	outcome = calculate(expression, options)
 	assert not outcome.ok
+	assert outcome.result is None
 	assert outcome.error is not None
+	assert isinstance(outcome.error.code, CalculationErrorCode)
 	if code is not None:
 		assert outcome.error.code == code
 	return outcome.error
@@ -27,6 +37,50 @@ def test_basic_arithmetic_and_power():
 	assert_same_value(assert_ok("2+3*4").value, sp.Integer(14))
 	assert_same_value(assert_ok("(1+2)^3").value, sp.Integer(27))
 	assert_same_value(assert_ok("2**3").value, sp.Integer(8))
+
+
+def test_success_outcome_contract():
+	outcome = calculate("1 + 1")
+
+	assert outcome.ok is True
+	assert isinstance(outcome.result, CalculationResult)
+	assert outcome.error is None
+
+
+def test_failure_outcome_contract():
+	outcome = calculate("unknown_name")
+
+	assert outcome.ok is False
+	assert outcome.result is None
+	assert isinstance(outcome.error, CalculationError)
+	assert outcome.error.code is CalculationErrorCode.UNKNOWN_NAME
+
+
+def test_outcome_factories_enforce_invariants():
+	result = assert_ok("2")
+	error = CalculationError(
+		CalculationErrorCode.EMPTY_EXPRESSION,
+		"Expression is empty.",
+	)
+
+	success = CalculationOutcome.success(result)
+	failure = CalculationOutcome.failure(error)
+
+	assert success.ok is True
+	assert success.result == result
+	assert success.error is None
+	assert failure.ok is False
+	assert failure.result is None
+	assert failure.error == error
+
+	with pytest.raises(TypeError):
+		CalculationOutcome(ok=True, result=result)
+
+	with pytest.raises(ValueError):
+		CalculationOutcome._create(ok=True, result=None, error=error)
+
+	with pytest.raises(ValueError):
+		CalculationOutcome._create(ok=False, result=result, error=None)
 
 
 def test_exact_and_decimal_output():
@@ -94,34 +148,34 @@ def test_complex_is_default_number_domain():
 def test_real_number_domain_rejects_complex_results():
 	options = EvaluationOptions(number_domain="real")
 
-	assert_error("sqrt(-1)", "NON_REAL_RESULT", options)
+	assert_error("sqrt(-1)", CalculationErrorCode.NON_REAL_RESULT, options)
 
 
 def test_unknown_names_and_functions_are_rejected():
-	assert_error("x + 1", "UNKNOWN_NAME")
-	assert_error("foo(1)", "UNKNOWN_FUNCTION")
+	assert_error("x + 1", CalculationErrorCode.UNKNOWN_NAME)
+	assert_error("foo(1)", CalculationErrorCode.UNKNOWN_FUNCTION)
 
 
 def test_unsafe_or_unsupported_syntax_is_rejected():
-	assert_error("__import__('os')", "UNSUPPORTED_LITERAL")
-	assert_error("(1).__class__", "UNSUPPORTED_SYNTAX")
-	assert_error("[1, 2, 3]", "UNSUPPORTED_SYNTAX")
-	assert_error("sin(90 deg)", "INVALID_EXPRESSION")
+	assert_error("__import__('os')", CalculationErrorCode.UNSUPPORTED_LITERAL)
+	assert_error("(1).__class__", CalculationErrorCode.UNSUPPORTED_SYNTAX)
+	assert_error("[1, 2, 3]", CalculationErrorCode.UNSUPPORTED_SYNTAX)
+	assert_error("sin(90 deg)", CalculationErrorCode.INVALID_EXPRESSION)
 
 
 def test_invalid_argument_counts_are_rejected():
-	assert_error("sin(1, 2)", "INVALID_ARGUMENT_COUNT")
-	assert_error("min()", "INVALID_ARGUMENT_COUNT")
-	assert_error("log(1, 2, 3)", "INVALID_ARGUMENT_COUNT")
+	assert_error("sin(1, 2)", CalculationErrorCode.INVALID_ARGUMENT_COUNT)
+	assert_error("min()", CalculationErrorCode.INVALID_ARGUMENT_COUNT)
+	assert_error("log(1, 2, 3)", CalculationErrorCode.INVALID_ARGUMENT_COUNT)
 
 
 def test_invalid_factorial_is_rejected():
-	assert_error("2.5!", "INVALID_FACTORIAL")
-	assert_error("(-1)!", "INVALID_FACTORIAL")
+	assert_error("2.5!", CalculationErrorCode.INVALID_FACTORIAL)
+	assert_error("(-1)!", CalculationErrorCode.INVALID_FACTORIAL)
 
 
 def test_undefined_and_too_large_expressions_are_rejected():
-	assert_error("1/0", "UNDEFINED_RESULT")
-	assert_error("2^10001", "EXPONENT_TOO_LARGE")
-	assert_error("1001!", "FACTORIAL_TOO_LARGE")
-	assert_error("1" * 501, "EXPRESSION_TOO_LONG")
+	assert_error("1/0", CalculationErrorCode.UNDEFINED_RESULT)
+	assert_error("2^10001", CalculationErrorCode.EXPONENT_TOO_LARGE)
+	assert_error("1001!", CalculationErrorCode.FACTORIAL_TOO_LARGE)
+	assert_error("1" * 501, CalculationErrorCode.EXPRESSION_TOO_LONG)
