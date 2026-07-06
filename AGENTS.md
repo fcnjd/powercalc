@@ -65,8 +65,15 @@ powercalc/
 	core/
 		__init__.py
 		calculator.py
+	gui/
+		__init__.py
+		app.py
+		formatting.py
+		main_window.py
 tests/
 	test_core_calculator.py
+	test_gui_formatting.py
+	test_gui_import.py
 main.py
 ```
 
@@ -74,8 +81,6 @@ Expected later extensions:
 
 ```text
 powercalc/
-	gui/
-		...
 	i18n/
 		...
 ```
@@ -90,6 +95,30 @@ powercalc/
 
 The GUI must access the calculation core only through clear public functions
 and data types. The core must not depend on wxPython.
+
+## Current GUI Behavior
+
+The first wxPython GUI increment is intentionally small and keyboard-first:
+
+- native controls only: expression `wx.TextCtrl`, Calculate `wx.Button`,
+  read-only result `wx.TextCtrl`, menu bar, and status bar
+- initial focus starts in the expression input
+- the result output must be reachable with Tab even before a calculation has
+  moved focus there
+- Enter in the expression input triggers calculation
+- Calculate can also be reached by Tab and activated with Space or Enter
+- successful calculations move focus to the result output and select all text
+- errors are displayed in the result output as short text beginning with
+  `Error:`
+- `Ctrl+L` clears only the expression input, leaves the previous output
+  unchanged, returns focus to input, and sets a short status message
+- `Ctrl+C` copies the selected result/error text when focus is in the output
+- menus are File, Edit, and Help; Alt-key letters are reserved for menu access
+- F1 opens a short Keyboard Commands help dialog
+
+GUI result formatting is deliberately presentation-only. It uses the core
+`CalculationResult.decimal_text` but strips unnecessary trailing zeroes so
+ordinary integer results such as `14.0000000000` are read as `14`.
 
 ## Current Core API Contract
 
