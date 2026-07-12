@@ -25,7 +25,7 @@ jobs:
         run: uv run --frozen ruff check .
 
       - name: Run Ruff format check
-        run: uv run --frozen ruff format --check .
+        run: uv run --frozen ruff format --diff .
 
       - name: Run pytest
         run: uv run --frozen pytest
