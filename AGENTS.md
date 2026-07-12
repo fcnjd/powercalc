@@ -51,6 +51,7 @@ Current runtime dependencies:
 
 Current development dependencies:
 
+- `pyinstaller` — Windows desktop app bundling for release artifacts
 - `ruff` — linting and formatting
 - `pytest` — automated tests
 
@@ -70,10 +71,24 @@ powercalc/
 		app.py
 		formatting.py
 		main_window.py
+assets/
+	powercalc.ico
+	source/
+		powercalc-icon.svg
+installer/
+	powercalc.iss
 tests/
 	test_core_calculator.py
 	test_gui_formatting.py
 	test_gui_import.py
+tools/
+	build.py
+	check_version.py
+	release_notes.py
+.github/
+	workflows/
+		ci.yml
+		release.yml
 main.py
 ```
 
@@ -115,6 +130,8 @@ The first wxPython GUI increment is intentionally small and keyboard-first:
 - `Ctrl+C` copies the selected result/error text when focus is in the output
 - menus are File, Edit, and Help; Alt-key letters are reserved for menu access
 - F1 opens a short Keyboard Commands help dialog
+- the main window title includes the public version
+- Help > About opens a concise native dialog with version information
 
 GUI result formatting is deliberately presentation-only. It uses the core
 `CalculationResult.decimal_text` but strips unnecessary trailing zeroes so
@@ -247,6 +264,10 @@ uv run python main.py
 uv run pytest
 uv run ruff check .
 uv run ruff format .
+uv run ruff format --check .
+uv run python -m tools.build portable
+uv run python -m tools.build installer
+uv run python -m tools.build all
 ```
 
 Ruff conventions from `pyproject.toml`:
@@ -259,17 +280,49 @@ Ruff conventions from `pyproject.toml`:
 
 Keep this formatting when editing existing Python files.
 
-## GitHub Actions, Later
+## Versioning, Builds, and Releases
 
-Do not add CI before the base structure and tests are stable enough. The likely
-first CI workflow should run:
+- The current version is `0.2.0-beta.1`.
+- `pyproject.toml` `project.version` is the canonical project version.
+- `powercalc.version.__version__` must match `pyproject.toml`; tests enforce
+  this.
+- Release tags use the format `v<version>`, for example
+  `v0.2.0-beta.1`.
+- Official packaged artifacts currently target Windows x64.
+- PyInstaller builds a `onedir` app bundle.
+- The portable ZIP and Inno Setup 7 installer are both produced from the same
+  PyInstaller bundle.
+- Inno Setup uses stable `AppId`
+  `{655f06a0-68c6-4878-b32b-f102f3415ace}` so future installers upgrade the
+  same application line instead of creating a separate product.
+- The build helper prefers Inno Setup 7, including the per-user install path
+  `%LOCALAPPDATA%\Programs\Inno Setup 7\ISCC.exe`.
+- Beta builds are unsigned. README and release notes must keep the SmartScreen
+  warning clear until code signing is introduced.
+- Release artifacts include `SHA256SUMS.txt`.
+- The editable icon source stays in `assets/source/`; only
+  `assets/powercalc.ico` is used by packaged builds.
+- Do not add Pillow for icon generation unless the icon-generation workflow is
+  intentionally made a maintained project tool later.
 
-- `uv sync`
+## GitHub Actions
+
+CI runs on push and pull request:
+
+- `uv sync --frozen`
 - Ruff check
 - Ruff format check
 - pytest
-- optional mypy once typing policy is ready
-- later release/build artifact steps
+- GUI/package import smoke check
+
+Release builds run when a `v*` tag is pushed:
+
+- validate tag/version consistency
+- run CI checks
+- install Inno Setup 7
+- build portable ZIP and installer
+- generate checksums
+- create a GitHub prerelease using notes from `CHANGELOG.md`
 
 ## Documentation Maintenance
 

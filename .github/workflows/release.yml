@@ -1,0 +1,82 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  windows-release:
+    name: Build Windows x64 release
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v8.1.0
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Read version
+        id: version
+        shell: pwsh
+        run: |
+          $version = uv run --frozen python -c "from powercalc.version import get_version; print(get_version())"
+          "version=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Validate tag matches project version
+        run: >
+          uv run --frozen python -m tools.check_version
+          --tag "${{ github.ref_name }}"
+
+      - name: Run Ruff lint
+        run: uv run --frozen ruff check .
+
+      - name: Run Ruff format check
+        run: uv run --frozen ruff format --check .
+
+      - name: Run pytest
+        run: uv run --frozen pytest
+
+      - name: Run import smoke check
+        run: >
+          uv run --frozen python -c
+          "import powercalc; import powercalc.gui;
+          from powercalc.version import get_version;
+          print(f'Powercalc {get_version()} import smoke check passed.')"
+
+      - name: Install Inno Setup 7
+        run: choco install innosetup --no-progress -y
+
+      - name: Build release artifacts
+        run: uv run --frozen python -m tools.build all
+
+      - name: Extract release notes
+        run: >
+          uv run --frozen python -m tools.release_notes
+          --version "${{ steps.version.outputs.version }}"
+          --output release_notes.md
+
+      - name: Upload workflow artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: powercalc-${{ steps.version.outputs.version }}-windows-x64
+          path: dist/release/*
+
+      - name: Create GitHub prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >
+          gh release create "${{ github.ref_name }}"
+          dist/release/*
+          --title "Powercalc ${{ steps.version.outputs.version }}"
+          --notes-file release_notes.md
+          --prerelease
