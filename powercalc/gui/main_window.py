@@ -9,6 +9,8 @@ from powercalc.gui.formatting import (
 	format_error_for_display,
 	format_result_for_display,
 )
+from powercalc.gui.resources import get_app_icon_path
+from powercalc.version import get_version, get_versioned_title
 
 
 ID_CLEAR_INPUT = wx.NewIdRef()
@@ -21,6 +23,7 @@ Tab and Shift+Tab: Move between controls.
 Ctrl+L: Clear expression input.
 Ctrl+C in result output: Copy selected result.
 F1: Show this help.
+Alt+H, A: Show version information.
 Alt+F, Alt+E, Alt+H: Open menus.
 Alt+F4: Exit."""
 
@@ -49,7 +52,8 @@ class MainFrame(wx.Frame):
 	"""Main calculator window built from native wxPython controls."""
 
 	def __init__(self) -> None:
-		super().__init__(None, title="Powercalc", size=(640, 260))
+		super().__init__(None, title=get_versioned_title(), size=(640, 260))
+		self._set_window_icon()
 		self._create_menu_bar()
 		self._create_controls()
 		self.CreateStatusBar()
@@ -89,10 +93,21 @@ class MainFrame(wx.Frame):
 			"&Keyboard Commands\tF1",
 			"Show keyboard commands",
 		)
+		about_item = help_menu.Append(
+			wx.ID_ABOUT,
+			"&About Powercalc",
+			"Show Powercalc version information",
+		)
 		self.Bind(wx.EVT_MENU, self._on_keyboard_help, commands_item)
+		self.Bind(wx.EVT_MENU, self._on_about, about_item)
 		menu_bar.Append(help_menu, "&Help")
 
 		self.SetMenuBar(menu_bar)
+
+	def _set_window_icon(self) -> None:
+		icon_path = get_app_icon_path()
+		if icon_path is not None:
+			self.SetIcon(wx.Icon(str(icon_path), wx.BITMAP_TYPE_ICO))
 
 	def _create_controls(self) -> None:
 		panel = wx.Panel(self)
@@ -189,6 +204,23 @@ class MainFrame(wx.Frame):
 			self,
 			KEYBOARD_HELP,
 			"Keyboard Commands",
+			wx.OK | wx.ICON_INFORMATION,
+		)
+		try:
+			dialog.ShowModal()
+		finally:
+			dialog.Destroy()
+		event.Skip(False)
+
+	def _on_about(self, event: wx.Event) -> None:
+		dialog = wx.MessageDialog(
+			self,
+			(
+				f"Powercalc {get_version()}\n\n"
+				"Accessible desktop calculator.\n"
+				"Updates are available from GitHub Releases."
+			),
+			"About Powercalc",
 			wx.OK | wx.ICON_INFORMATION,
 		)
 		try:
