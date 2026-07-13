@@ -12,7 +12,7 @@ def test_windows_artifact_names_include_version_and_platform(monkeypatch):
 
 	assert (
 		artifact_name("portable.zip")
-		== "Powercalc-0.2.0-beta.1-windows-x64-portable.zip"
+		== "Powercalc-0.3.0-beta.1-windows-x64-portable.zip"
 	)
 	assert (
 		artifact_name("setup") == "Powercalc-0.2.0-beta.1-windows-x64-setup.exe"

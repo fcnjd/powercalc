@@ -313,7 +313,7 @@ Keep this formatting when editing existing Python files.
 
 ## Versioning, Builds, and Releases
 
-- The current version is `0.2.0-beta.1`.
+- The current version is `0.3.0-beta.1`.
 - `pyproject.toml` `project.version` is the canonical project version.
 - `powercalc.version.__version__` must match `pyproject.toml`; tests enforce
   this.
