@@ -18,6 +18,7 @@ import tomllib
 import zipfile
 
 from powercalc.version import get_version
+from powercalc.settings import PORTABLE_MARKER_NAME
 
 
 APP_NAME = "Powercalc"
@@ -128,6 +129,15 @@ def build_portable_zip() -> Path:
 	zip_path = RELEASE_ROOT / artifact_name("portable.zip")
 	remove_path(zip_path)
 
+	write_portable_archive(bundle_path, zip_path)
+
+	print(f"Created {zip_path}")
+	return zip_path
+
+
+def write_portable_archive(bundle_path: Path, zip_path: Path) -> None:
+	"""Write a portable ZIP containing the app and its mode marker."""
+
 	with zipfile.ZipFile(
 		zip_path,
 		"w",
@@ -140,9 +150,7 @@ def build_portable_zip() -> Path:
 					file_path,
 					Path(APP_NAME) / file_path.relative_to(bundle_path),
 				)
-
-	print(f"Created {zip_path}")
-	return zip_path
+		archive.writestr(f"{APP_NAME}/{PORTABLE_MARKER_NAME}", "{}\n")
 
 
 def build_installer() -> Path:

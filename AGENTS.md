@@ -63,6 +63,7 @@ Package/project manager:
 
 ```text
 powercalc/
+	settings.py
 	core/
 		__init__.py
 		calculator.py
@@ -81,6 +82,7 @@ tests/
 	test_core_calculator.py
 	test_gui_formatting.py
 	test_gui_import.py
+	test_settings.py
 tools/
 	build.py
 	check_version.py
@@ -128,7 +130,16 @@ The first wxPython GUI increment is intentionally small and keyboard-first:
 - `Ctrl+L` clears only the expression input, leaves the previous output
   unchanged, returns focus to input, and sets a short status message
 - `Ctrl+C` copies the selected result/error text when focus is in the output
-- menus are File, Edit, and Help; Alt-key letters are reserved for menu access
+- menus are File, Edit, Options, and Help; Alt-key letters are reserved for
+  menu access
+- the Options menu uses native radio and check menu items for angle unit,
+  decimal separator, number domain, logarithm mode, and error sound
+- decimal precision is set through a small native dialog and is limited to
+  1 through 100 significant digits
+- option changes apply to the next calculation, save immediately, and do not
+  rewrite the current input or output
+- calculation errors play one system sound by default before the existing
+  text error output receives focus; this can be disabled in Options
 - F1 opens a short Keyboard Commands help dialog
 - the main window title includes the public version
 - Help > About opens a concise native dialog with version information
@@ -136,6 +147,13 @@ The first wxPython GUI increment is intentionally small and keyboard-first:
 GUI result formatting is deliberately presentation-only. It uses the core
 `CalculationResult.decimal_text` but strips unnecessary trailing zeroes so
 ordinary integer results such as `14.0000000000` are read as `14`.
+
+Application settings are stored as readable versioned JSON. Installed and
+development runs use the per-user configuration directory from `platformdirs`.
+The portable ZIP alone contains `portable.json`; when this marker is beside
+the executable, `settings.json` is stored there too. Invalid values fall back
+field by field, while malformed files are backed up before defaults are
+written. Persistence logic remains independent of wxPython.
 
 ## Current Core API Contract
 

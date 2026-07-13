@@ -2,6 +2,19 @@
 
 All notable user-facing changes are recorded here.
 
+## [Unreleased]
+
+### Added
+
+- Keyboard-accessible Options menu for angle unit, decimal separator, number
+  domain, logarithm mode, decimal precision, and calculation error sounds.
+- Persistent readable JSON settings with a separate portable storage mode.
+
+### Changed
+
+- Failed calculations can play a system sound before focus moves to the
+  copyable error output.
+
 ## [0.2.0-beta.1] - 2026-07-12
 
 ### Added

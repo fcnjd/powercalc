@@ -1,4 +1,6 @@
-from tools.build import artifact_name
+from zipfile import ZipFile
+
+from tools.build import artifact_name, write_portable_archive
 from tools.release_notes import extract_release_notes
 
 
@@ -22,3 +24,16 @@ def test_changelog_notes_can_be_extracted_for_current_beta():
 
 	assert "Portable ZIP" in notes
 	assert "SmartScreen" in notes
+
+
+def test_portable_archive_contains_mode_marker(tmp_path):
+	bundle_path = tmp_path / "bundle"
+	bundle_path.mkdir()
+	(bundle_path / "Powercalc.exe").write_bytes(b"application")
+	zip_path = tmp_path / "portable.zip"
+
+	write_portable_archive(bundle_path, zip_path)
+
+	with ZipFile(zip_path) as archive:
+		assert archive.read("Powercalc/portable.json") == b"{}\n"
+		assert archive.read("Powercalc/Powercalc.exe") == b"application"

@@ -17,6 +17,11 @@ Portable use:
 2. Extract the archive.
 3. Run `Powercalc.exe` from the extracted `Powercalc` folder.
 
+The portable archive keeps `settings.json` beside `Powercalc.exe`. The
+included `portable.json` file identifies this storage mode and should not be
+deleted. Installer and development runs store settings in the current
+Windows user's application configuration folder.
+
 Installer use:
 
 1. Download `Powercalc-<version>-windows-x64-setup.exe`.
@@ -31,6 +36,16 @@ Verify downloads with `SHA256SUMS.txt` when possible.
 Updates are manual for now. Download the newer ZIP or installer from GitHub
 Releases. The installer uses a stable application identity so future installer
 updates can replace an existing Powercalc installation cleanly.
+
+## Calculation options
+
+Press `Alt+O` to open the Options menu. It provides native keyboard-accessible
+radio and check items for angle unit, decimal separator, number domain,
+logarithm mode, decimal precision, and the optional calculation error sound.
+Changes apply to the next calculation and are saved immediately.
+
+Point mode uses commas between function arguments. Comma mode uses decimal
+commas and semicolons between function arguments, for example `log(8; 2)`.
 
 ## Development
 
