@@ -5,6 +5,7 @@ from powercalc.core.calculator import (
 	CalculationErrorCode,
 	CalculationOutcome,
 	CalculationResult,
+	DecimalSeparator,
 	EvaluationOptions,
 	calculate,
 )
@@ -14,6 +15,7 @@ __all__ = [
 	"CalculationErrorCode",
 	"CalculationOutcome",
 	"CalculationResult",
+	"DecimalSeparator",
 	"EvaluationOptions",
 	"calculate",
 ]

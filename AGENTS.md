@@ -163,6 +163,12 @@ Important API rules:
   use the text fields.
 - Core API docstrings are the current source of API documentation until a
   dedicated user/developer documentation structure exists.
+- `EvaluationOptions.decimal_separator` accepts `"point"` (the default) or
+  `"comma"`. It controls input parsing and the notation used by
+  `CalculationResult.normalized_text`, `exact_text`, and `decimal_text`.
+- `CalculationResult.input_text` always preserves the original input, while
+  `CalculationResult.value` remains the canonical SymPy object. Use
+  `str(result.value)` when raw canonical SymPy text is required.
 
 ## Mathematics and Parser Rules
 
@@ -181,6 +187,13 @@ Important API rules:
   `EvaluationOptions`.
 - The default `log` mode is calculator-style base 10. Natural-log mode is
   available through `EvaluationOptions`.
+- Point mode uses a decimal point and comma-separated function arguments.
+  Semicolons are also accepted for arguments and normalize to commas.
+- Comma mode uses a decimal comma and requires semicolons between function
+  arguments, for example `log(8; 2)` and `min(1,5; 2,5)`.
+- Separator normalization happens before the restricted AST parser. SymPy
+  receives only canonical point notation; localized text is produced only
+  after safe evaluation.
 
 Examples of early target expressions:
 

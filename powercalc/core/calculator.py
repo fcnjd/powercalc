@@ -12,6 +12,7 @@ import sympy as sp
 
 
 AngleUnit = Literal["radian", "degree", "gradian"]
+DecimalSeparator = Literal["point", "comma"]
 LogMode = Literal["calculator", "natural"]
 NumberDomain = Literal["complex", "real"]
 
@@ -36,6 +37,7 @@ class CalculationErrorCode(StrEnum):
 	EXPRESSION_TOO_DEEP = "EXPRESSION_TOO_DEEP"
 	INVALID_EXPRESSION = "INVALID_EXPRESSION"
 	INVALID_OPTION = "INVALID_OPTION"
+	INVALID_SEPARATOR = "INVALID_SEPARATOR"
 	INVALID_ARGUMENT_COUNT = "INVALID_ARGUMENT_COUNT"
 	UNKNOWN_NAME = "UNKNOWN_NAME"
 	UNKNOWN_FUNCTION = "UNKNOWN_FUNCTION"
@@ -57,6 +59,10 @@ class EvaluationOptions:
 	Attributes:
 		decimal_precision: Number of significant digits used for
 			``CalculationResult.decimal_text``. The default is 12.
+		decimal_separator: ``"point"`` uses a decimal point and commas
+			between function arguments. ``"comma"`` uses a decimal comma
+			and semicolons between function arguments. The setting also
+			controls the notation of the result text fields.
 		number_domain: ``"complex"`` allows complex results; ``"real"``
 			rejects non-real results with ``NON_REAL_RESULT``. The default is
 			``"complex"``.
@@ -69,6 +75,7 @@ class EvaluationOptions:
 	"""
 
 	decimal_precision: int = 12
+	decimal_separator: DecimalSeparator = "point"
 	number_domain: NumberDomain = "complex"
 	log_mode: LogMode = "calculator"
 	angle_unit: AngleUnit = "radian"
@@ -97,9 +104,12 @@ class CalculationResult:
 
 	Attributes:
 		input_text: Original input string passed to ``calculate``.
-		normalized_text: Parser-normalized form, for diagnostics only.
-		exact_text: Exact SymPy text representation after simplification.
+		normalized_text: Parser-normalized form using the selected notation,
+			for diagnostics only.
+		exact_text: Exact mathematical text after simplification using the
+			selected notation. Use ``str(value)`` for canonical SymPy text.
 		decimal_text: Decimal approximation using the selected precision.
+			The text uses the selected notation.
 		value: Public SymPy expression for tests and future advanced features.
 	"""
 
@@ -196,8 +206,8 @@ def calculate(
 
 	try:
 		_validate_options(options)
-		normalized = _normalize_expression(expression)
-		parsed = ast.parse(normalized, mode="eval")
+		canonical_normalized = _normalize_expression(expression, options)
+		parsed = ast.parse(canonical_normalized, mode="eval")
 		_check_ast_limits(parsed)
 		context = _EvaluationContext(options)
 		value = context.convert(parsed.body)
@@ -205,9 +215,18 @@ def calculate(
 		_validate_result(value, options)
 		result = CalculationResult(
 			input_text=expression,
-			normalized_text=normalized,
-			exact_text=str(value),
-			decimal_text=str(sp.N(value, options.decimal_precision)),
+			normalized_text=_localize_expression_text(
+				canonical_normalized,
+				options.decimal_separator,
+			),
+			exact_text=_localize_expression_text(
+				str(value),
+				options.decimal_separator,
+			),
+			decimal_text=_localize_expression_text(
+				str(sp.N(value, options.decimal_precision)),
+				options.decimal_separator,
+			),
 			value=value,
 		)
 		return CalculationOutcome.success(result)
@@ -228,6 +247,11 @@ def _validate_options(options: EvaluationOptions) -> None:
 			CalculationErrorCode.INVALID_OPTION,
 			"Decimal precision must be at least 1.",
 		)
+	if options.decimal_separator not in {"point", "comma"}:
+		raise ExpressionError(
+			CalculationErrorCode.INVALID_OPTION,
+			"Unknown decimal separator.",
+		)
 	if options.number_domain not in {"complex", "real"}:
 		raise ExpressionError(
 			CalculationErrorCode.INVALID_OPTION,
@@ -245,7 +269,10 @@ def _validate_options(options: EvaluationOptions) -> None:
 		)
 
 
-def _normalize_expression(expression: str) -> str:
+def _normalize_expression(
+	expression: str,
+	options: EvaluationOptions,
+) -> str:
 	source = expression.strip()
 	if not source:
 		raise ExpressionError(
@@ -258,6 +285,10 @@ def _normalize_expression(expression: str) -> str:
 			"Expression is too long.",
 		)
 
+	source = _normalize_expression_separators(
+		source,
+		options.decimal_separator,
+	)
 	source = source.replace("^", "**")
 	source = _replace_factorials(source)
 
@@ -268,6 +299,61 @@ def _normalize_expression(expression: str) -> str:
 		)
 
 	return source
+
+
+def _normalize_expression_separators(
+	source: str,
+	decimal_separator: DecimalSeparator,
+) -> str:
+	if decimal_separator == "point":
+		return source.replace(";", ",")
+
+	characters: list[str] = []
+	for index, character in enumerate(source):
+		previous = source[index - 1] if index > 0 else ""
+		following = source[index + 1] if index + 1 < len(source) else ""
+
+		if character == ",":
+			if previous.isdigit() and following.isdigit():
+				characters.append(".")
+				continue
+			raise ExpressionError(
+				CalculationErrorCode.INVALID_SEPARATOR,
+				(
+					"Use a semicolon to separate function arguments "
+					"when decimal comma is selected."
+				),
+				index,
+			)
+		if character == "." and (previous.isdigit() or following.isdigit()):
+			raise ExpressionError(
+				CalculationErrorCode.INVALID_SEPARATOR,
+				"Use a comma as the decimal separator.",
+				index,
+			)
+		characters.append("," if character == ";" else character)
+
+	return "".join(characters)
+
+
+def _localize_expression_text(
+	text: str,
+	decimal_separator: DecimalSeparator,
+) -> str:
+	if decimal_separator == "point":
+		return text
+
+	characters: list[str] = []
+	for index, character in enumerate(text):
+		previous = text[index - 1] if index > 0 else ""
+		following = text[index + 1] if index + 1 < len(text) else ""
+		if character == "." and (previous.isdigit() or following.isdigit()):
+			characters.append(",")
+		elif character == ",":
+			characters.append(";")
+		else:
+			characters.append(character)
+	return "".join(characters)
 
 
 def _replace_factorials(source: str) -> str:
