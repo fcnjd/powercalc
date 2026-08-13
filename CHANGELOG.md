@@ -15,6 +15,11 @@ All notable user-facing changes are recorded here.
 - Failed calculations can play a system sound before focus moves to the
   copyable error output.
 
+### Notes
+
+- This beta is unsigned. Windows may show a SmartScreen warning until future
+  releases are code-signed.
+
 ## [0.2.0-beta.1] - 2026-07-12
 
 ### Added

@@ -31,6 +31,17 @@ def main() -> int:
 
 def extract_release_notes(version: str) -> str:
 	changelog = (PROJECT_ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
+	return extract_release_notes_from_text(changelog, version)
+
+
+def extract_release_notes_from_text(changelog: str, version: str) -> str:
+	"""Return the notes for one version heading from changelog text.
+
+	Kept separate from ``extract_release_notes`` so parsing behavior can be
+	unit-tested against synthetic changelog text, independent of the current
+	contents of CHANGELOG.md.
+	"""
+
 	heading_pattern = re.compile(r"^## \[(?P<version>[^\]]+)\]", re.MULTILINE)
 	matches = list(heading_pattern.finditer(changelog))
 	for index, match in enumerate(matches):
