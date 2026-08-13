@@ -67,10 +67,12 @@ powercalc/
 	core/
 		__init__.py
 		calculator.py
+		catalog.py
 	gui/
 		__init__.py
 		app.py
 		formatting.py
+		index_dialog.py
 		main_window.py
 assets/
 	powercalc.ico
@@ -80,8 +82,10 @@ installer/
 	powercalc.iss
 tests/
 	test_core_calculator.py
+	test_core_catalog.py
 	test_gui_formatting.py
 	test_gui_import.py
+	test_gui_index_dialog.py
 	test_settings.py
 tools/
 	build.py
@@ -140,6 +144,18 @@ The first wxPython GUI increment is intentionally small and keyboard-first:
   rewrite the current input or output
 - calculation errors play one system sound by default before the existing
   text error output receives focus; this can be disabled in Options
+- `Ctrl+Shift+X` (also via Edit > Function Index...) opens a native
+  searchable dialog listing every function and constant (Name/Code
+  columns), sorted alphabetically
+- typing in the dialog's filter box filters the list live by
+  case-insensitive substring match on name; Up/Down move the list
+  selection even while the filter box holds keyboard focus; Enter or
+  double-click on a row confirms and closes the dialog immediately;
+  Escape cancels; OK is disabled when no rows match
+- selecting an entry inserts its code at the current cursor position in
+  the expression input and repositions the caret per the entry (e.g.
+  inside the parentheses for `sqrt()`), then returns focus to the
+  expression input without selecting the inserted text
 - F1 opens a short Keyboard Commands help dialog
 - the main window title includes the public version
 - Help > About opens a concise native dialog with version information
@@ -165,6 +181,15 @@ The public calculation API currently lives in `powercalc.core`:
 - `CalculationResult`
 - `CalculationError`
 - `CalculationErrorCode`
+- `FUNCTION_CATALOG` — an alphabetically sorted tuple of `CatalogEntry`
+  describing every callable function and constant, used by the GUI's
+  function/constant index dialog.
+- `CatalogEntry(name, insert_text, cursor_offset)` — `cursor_offset` is the
+  caret position after insertion, measured from the start of `insert_text`
+  (right after the opening parenthesis for functions, end of text for
+  constants). `FUNCTION_CATALOG` must stay in sync with `calculator.py`'s
+  dispatch logic; `tests/test_core_catalog.py` enforces this with a
+  round-trip `calculate()` check per entry.
 
 Important API rules:
 

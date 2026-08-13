@@ -7,11 +7,12 @@ from functools import partial
 
 import wx
 
-from powercalc.core import calculate
+from powercalc.core import FUNCTION_CATALOG, CatalogEntry, calculate
 from powercalc.gui.formatting import (
 	format_error_for_display,
 	format_result_for_display,
 )
+from powercalc.gui.index_dialog import FunctionIndexDialog
 from powercalc.gui.resources import get_app_icon_path
 from powercalc.settings import AppSettings, SettingsSaveError, SettingsStore
 from powercalc.version import get_version, get_versioned_title
@@ -21,6 +22,7 @@ ID_CLEAR_INPUT = wx.NewIdRef()
 ID_COPY_RESULT = wx.NewIdRef()
 ID_DECIMAL_PRECISION = wx.NewIdRef()
 ID_ERROR_SOUND = wx.NewIdRef()
+ID_FUNCTION_INDEX = wx.NewIdRef()
 ID_RESTORE_DEFAULTS = wx.NewIdRef()
 
 KEYBOARD_HELP = """Keyboard commands:
@@ -29,6 +31,8 @@ Enter in expression input: Calculate.
 Tab and Shift+Tab: Move between controls.
 Ctrl+L: Clear expression input.
 Ctrl+C in result output: Copy selected result.
+Ctrl+Shift+X: Open function and constant index.
+Index list uses arrow keys and Enter; Escape closes without inserting.
 F1: Show this help.
 Alt+O: Open calculation options.
 Options use arrow keys and Enter. Escape closes a menu without changes.
@@ -144,8 +148,14 @@ class MainFrame(wx.Frame):
 			"Copy &Result",
 			"Copy the result output",
 		)
+		index_item = edit_menu.Append(
+			ID_FUNCTION_INDEX,
+			"&Function Index...\tCtrl+Shift+X",
+			"Open the function and constant index",
+		)
 		self.Bind(wx.EVT_MENU, self._on_clear_input, clear_item)
 		self.Bind(wx.EVT_MENU, self._on_copy_result, copy_item)
+		self.Bind(wx.EVT_MENU, self._on_function_index, index_item)
 		menu_bar.Append(edit_menu, "&Edit")
 
 		options_menu = wx.Menu()
@@ -464,6 +474,31 @@ class MainFrame(wx.Frame):
 		finally:
 			wx.TheClipboard.Close()
 		event.Skip(False)
+
+	def _on_function_index(self, event: wx.Event) -> None:
+		dialog = FunctionIndexDialog(self, FUNCTION_CATALOG)
+		try:
+			if dialog.ShowModal() != wx.ID_OK:
+				event.Skip(False)
+				return
+			entry = dialog.get_selected_entry()
+		finally:
+			dialog.Destroy()
+
+		if entry is None:
+			event.Skip(False)
+			return
+		self._insert_catalog_entry(entry)
+		event.Skip(False)
+
+	def _insert_catalog_entry(self, entry: CatalogEntry) -> None:
+		insertion_point = self.expression_input.GetInsertionPoint()
+		self.expression_input.WriteText(entry.insert_text)
+		self.expression_input.SetInsertionPoint(
+			insertion_point + entry.cursor_offset
+		)
+		self.expression_input.SetFocus()
+		self.SetStatusText(f"Inserted {entry.name}.")
 
 	def _on_keyboard_help(self, event: wx.Event) -> None:
 		dialog = wx.MessageDialog(
