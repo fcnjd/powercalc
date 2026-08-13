@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
-from powercalc.core import CalculationError, CalculationResult
+from powercalc.core import CalculationError, CalculationResult, DecimalSeparator
 
 
-def format_result_for_display(result: CalculationResult) -> str:
+def format_result_for_display(
+	result: CalculationResult,
+	decimal_separator: DecimalSeparator = "point",
+) -> str:
 	"""Return concise result text for the first calculator GUI.
 
 	The core intentionally exposes both exact and decimal text. The first GUI
@@ -13,9 +16,10 @@ def format_result_for_display(result: CalculationResult) -> str:
 	ordinary integer results are read naturally by screen readers.
 	"""
 
-	if result.value.is_integer is True and result.value.is_number:
-		return _strip_decimal_trailing_zeroes(result.decimal_text)
-	return _strip_decimal_trailing_zeroes(result.decimal_text)
+	return _strip_decimal_trailing_zeroes(
+		result.decimal_text,
+		decimal_separator,
+	)
 
 
 def format_error_for_display(error: CalculationError) -> str:
@@ -24,19 +28,24 @@ def format_error_for_display(error: CalculationError) -> str:
 	return f"Error: {error.message}"
 
 
-def _strip_decimal_trailing_zeroes(text: str) -> str:
-	if not _looks_like_plain_decimal(text):
+def _strip_decimal_trailing_zeroes(
+	text: str,
+	decimal_separator: DecimalSeparator,
+) -> str:
+	point = "," if decimal_separator == "comma" else "."
+	if not _looks_like_plain_decimal(text, point):
 		return text
-	if "." not in text:
+	if point not in text:
 		return text
 
-	stripped = text.rstrip("0").rstrip(".")
+	stripped = text.rstrip("0").rstrip(point)
 	if stripped in {"", "-"}:
 		return "0"
 	return stripped
 
 
-def _looks_like_plain_decimal(text: str) -> bool:
+def _looks_like_plain_decimal(text: str, point: str) -> bool:
 	if not text:
 		return False
-	return all(character in "0123456789.-" for character in text)
+	allowed = "0123456789-" + point
+	return all(character in allowed for character in text)

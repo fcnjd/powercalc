@@ -331,7 +331,10 @@ class MainFrame(wx.Frame):
 		)
 		if outcome.ok:
 			assert outcome.result is not None
-			output_text = format_result_for_display(outcome.result)
+			output_text = format_result_for_display(
+				outcome.result,
+				self.settings.decimal_separator,
+			)
 			status_text = "Calculation complete."
 		else:
 			assert outcome.error is not None
