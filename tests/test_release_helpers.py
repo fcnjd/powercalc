@@ -15,12 +15,12 @@ def test_windows_artifact_names_include_version_and_platform(monkeypatch):
 		== "Powercalc-0.3.0-beta.1-windows-x64-portable.zip"
 	)
 	assert (
-		artifact_name("setup") == "Powercalc-0.2.0-beta.1-windows-x64-setup.exe"
+		artifact_name("setup") == "Powercalc-0.3.0-beta.1-windows-x64-setup.exe"
 	)
 
 
 def test_changelog_notes_can_be_extracted_for_current_beta():
-	notes = extract_release_notes("0.2.0-beta.1")
+	notes = extract_release_notes("0.3.0-beta.1")
 
 	assert "Portable ZIP" in notes
 	assert "SmartScreen" in notes
