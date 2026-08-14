@@ -9,6 +9,11 @@ All notable user-facing changes are recorded here.
 - Keyboard-accessible Options menu for angle unit, decimal separator, number
   domain, logarithm mode, decimal precision, and calculation error sounds.
 - Persistent readable JSON settings with a separate portable storage mode.
+- Function and constant index (`Ctrl+Shift+X`, also via Edit > Function
+  Index...): a searchable, keyboard-first dialog listing every available
+  function and constant that inserts the chosen entry at the cursor.
+- German (Deutsch) translation alongside English, with a language option
+  (System/English/Deutsch) in the Options menu.
 
 ### Changed
 
