@@ -9,7 +9,11 @@ from powercalc.core.calculator import (
 	EvaluationOptions,
 	calculate,
 )
-from powercalc.core.catalog import CatalogEntry, FUNCTION_CATALOG
+from powercalc.core.catalog import (
+	CatalogEntry,
+	FUNCTION_CATALOG,
+	build_insertion,
+)
 
 __all__ = [
 	"CalculationError",
@@ -20,5 +24,6 @@ __all__ = [
 	"DecimalSeparator",
 	"EvaluationOptions",
 	"FUNCTION_CATALOG",
+	"build_insertion",
 	"calculate",
 ]

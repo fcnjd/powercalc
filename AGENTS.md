@@ -145,17 +145,26 @@ The first wxPython GUI increment is intentionally small and keyboard-first:
 - calculation errors play one system sound by default before the existing
   text error output receives focus; this can be disabled in Options
 - `Ctrl+Shift+X` (also via Edit > Function Index...) opens a native
-  searchable dialog listing every function and constant (Name/Code
-  columns), sorted alphabetically
-- typing in the dialog's filter box filters the list live by
-  case-insensitive substring match on name; Up/Down move the list
-  selection even while the filter box holds keyboard focus; Enter or
-  double-click on a row confirms and closes the dialog immediately;
-  Escape cancels; OK is disabled when no rows match
+  searchable dialog listing every function and constant, sorted
+  alphabetically by a descriptive display name (e.g. "Quadratwurzel von
+  n"); each row shows the display name and the code it inserts as one
+  line of text, e.g. "Quadratwurzel von n — sqrt(n)"
+- keyboard focus starts on the list itself (not the search field), so a
+  typed letter uses the native list type-ahead to jump straight to a
+  matching row; Tab reaches a search field that filters the list live by
+  case-insensitive substring match against both the display name and the
+  raw function/constant name (e.g. typing "sqrt" finds "Quadratwurzel von
+  n")
+- Up/Down move the list selection whether focus is on the list or the
+  search field; Enter or double-click on a row confirms and closes the
+  dialog immediately; Escape cancels; OK is disabled when no rows match
 - selecting an entry inserts its code at the current cursor position in
-  the expression input and repositions the caret per the entry (e.g.
-  inside the parentheses for `sqrt()`), then returns focus to the
-  expression input without selecting the inserted text
+  the expression input; for functions, the first argument name is
+  pre-selected so it can be typed over immediately (e.g. inserting `log`
+  selects the `n` in `log(n, a)`); the argument separator matches the
+  current decimal separator setting (`, ` in point mode, `; ` in comma
+  mode); constants are inserted as plain text with the caret placed at
+  the end; focus then returns to the expression input
 - F1 opens a short Keyboard Commands help dialog
 - the main window title includes the public version
 - Help > About opens a concise native dialog with version information
@@ -181,15 +190,20 @@ The public calculation API currently lives in `powercalc.core`:
 - `CalculationResult`
 - `CalculationError`
 - `CalculationErrorCode`
-- `FUNCTION_CATALOG` — an alphabetically sorted tuple of `CatalogEntry`
-  describing every callable function and constant, used by the GUI's
-  function/constant index dialog.
-- `CatalogEntry(name, insert_text, cursor_offset)` — `cursor_offset` is the
-  caret position after insertion, measured from the start of `insert_text`
-  (right after the opening parenthesis for functions, end of text for
-  constants). `FUNCTION_CATALOG` must stay in sync with `calculator.py`'s
-  dispatch logic; `tests/test_core_catalog.py` enforces this with a
-  round-trip `calculate()` check per entry.
+- `FUNCTION_CATALOG` — a tuple of `CatalogEntry`, sorted alphabetically by
+  `display_name`, describing every callable function and constant, used
+  by the GUI's function/constant index dialog.
+- `CatalogEntry(display_name, function_name, parameters)` — `parameters`
+  holds the argument names shown to the user (e.g. `("n", "a")` for
+  `log`); an empty tuple marks a constant, inserted as bare text.
+  `FUNCTION_CATALOG` must stay in sync with `calculator.py`'s dispatch
+  logic; `tests/test_core_catalog.py` enforces this with a round-trip
+  `calculate()` check per entry.
+- `build_insertion(entry, decimal_separator) -> (text, selection_start,
+  selection_end)` — builds the text to insert for a catalog entry and the
+  selection span of its first argument (empty span at the end of the text
+  for constants), using the argument separator that matches
+  `decimal_separator`.
 
 Important API rules:
 

@@ -7,7 +7,12 @@ from functools import partial
 
 import wx
 
-from powercalc.core import FUNCTION_CATALOG, CatalogEntry, calculate
+from powercalc.core import (
+	FUNCTION_CATALOG,
+	CatalogEntry,
+	build_insertion,
+	calculate,
+)
 from powercalc.gui.formatting import (
 	format_error_for_display,
 	format_result_for_display,
@@ -32,7 +37,10 @@ Tab and Shift+Tab: Move between controls.
 Ctrl+L: Clear expression input.
 Ctrl+C in result output: Copy selected result.
 Ctrl+Shift+X: Open function and constant index.
-Index list uses arrow keys and Enter; Escape closes without inserting.
+The index opens with the list focused; type a letter to jump, or use
+arrow keys and Enter. Tab reaches a search field that filters by
+substring. Escape closes without inserting. Inserting selects the
+first argument so it can be typed over immediately.
 F1: Show this help.
 Alt+O: Open calculation options.
 Options use arrow keys and Enter. Escape closes a menu without changes.
@@ -476,7 +484,11 @@ class MainFrame(wx.Frame):
 		event.Skip(False)
 
 	def _on_function_index(self, event: wx.Event) -> None:
-		dialog = FunctionIndexDialog(self, FUNCTION_CATALOG)
+		dialog = FunctionIndexDialog(
+			self,
+			FUNCTION_CATALOG,
+			self.settings.decimal_separator,
+		)
 		try:
 			if dialog.ShowModal() != wx.ID_OK:
 				event.Skip(False)
@@ -492,13 +504,19 @@ class MainFrame(wx.Frame):
 		event.Skip(False)
 
 	def _insert_catalog_entry(self, entry: CatalogEntry) -> None:
-		insertion_point = self.expression_input.GetInsertionPoint()
-		self.expression_input.WriteText(entry.insert_text)
-		self.expression_input.SetInsertionPoint(
-			insertion_point + entry.cursor_offset
+		text, start, end = build_insertion(
+			entry, self.settings.decimal_separator
 		)
+		insertion_point = self.expression_input.GetInsertionPoint()
+		self.expression_input.WriteText(text)
+		if start == end:
+			self.expression_input.SetInsertionPoint(insertion_point + start)
+		else:
+			self.expression_input.SetSelection(
+				insertion_point + start, insertion_point + end
+			)
 		self.expression_input.SetFocus()
-		self.SetStatusText(f"Inserted {entry.name}.")
+		self.SetStatusText(f"Inserted {entry.display_name}.")
 
 	def _on_keyboard_help(self, event: wx.Event) -> None:
 		dialog = wx.MessageDialog(

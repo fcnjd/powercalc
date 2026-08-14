@@ -6,16 +6,27 @@ from collections.abc import Sequence
 
 import wx
 
-from powercalc.core import CatalogEntry
+from powercalc.core import CatalogEntry, DecimalSeparator, build_insertion
 
 
 def filter_catalog_entries(
 	entries: Sequence[CatalogEntry], query: str
 ) -> list[CatalogEntry]:
-	"""Return entries whose name contains ``query`` (case-insensitive)."""
+	"""Return entries whose display or function name contains ``query``.
+
+	Matching is case-insensitive and checks both the descriptive display
+	name and the raw function/constant name, so a user who knows the
+	technical name (e.g. "sqrt") can find it even though the list shows
+	a descriptive label (e.g. "Quadratwurzel von n").
+	"""
 
 	needle = query.casefold()
-	return [entry for entry in entries if needle in entry.name.casefold()]
+	return [
+		entry
+		for entry in entries
+		if needle in entry.display_name.casefold()
+		or needle in entry.function_name.casefold()
+	]
 
 
 class FunctionIndexDialog(wx.Dialog):
@@ -25,15 +36,17 @@ class FunctionIndexDialog(wx.Dialog):
 		self,
 		parent: wx.Window,
 		entries: Sequence[CatalogEntry],
+		decimal_separator: DecimalSeparator,
 	) -> None:
 		super().__init__(
 			parent,
 			title="Function and Constant Index",
 			style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER,
-			size=(360, 420),
+			size=(480, 420),
 		)
+		self._decimal_separator = decimal_separator
 		self._all_entries = sorted(
-			entries, key=lambda entry: entry.name.casefold()
+			entries, key=lambda entry: entry.display_name.casefold()
 		)
 		self._visible_entries: list[CatalogEntry] = []
 
@@ -43,19 +56,15 @@ class FunctionIndexDialog(wx.Dialog):
 		self.filter_input = wx.TextCtrl(self)
 		self.filter_input.SetName("Filter functions and constants")
 		self.filter_input.Bind(wx.EVT_TEXT, self._on_filter_text)
-		self.filter_input.Bind(wx.EVT_KEY_DOWN, self._on_filter_key_down)
+		self.filter_input.Bind(wx.EVT_KEY_DOWN, self._on_navigation_key_down)
 
-		self.results_list = wx.ListCtrl(
-			self,
-			style=wx.LC_REPORT | wx.LC_SINGLE_SEL,
-		)
+		self.results_list = wx.ListBox(self, style=wx.LB_SINGLE)
 		self.results_list.SetName("Functions and constants")
-		self.results_list.InsertColumn(0, "Name", width=140)
-		self.results_list.InsertColumn(1, "Code", width=140)
 		self.results_list.Bind(
-			wx.EVT_LIST_ITEM_ACTIVATED,
+			wx.EVT_LISTBOX_DCLICK,
 			self._on_list_item_activated,
 		)
+		self.results_list.Bind(wx.EVT_KEY_DOWN, self._on_navigation_key_down)
 
 		main_sizer.Add(filter_label, wx.SizerFlags(0).Border(wx.ALL, 12))
 		main_sizer.Add(
@@ -76,42 +85,40 @@ class FunctionIndexDialog(wx.Dialog):
 			wx.SizerFlags(0).Expand().Border(wx.ALL, 12),
 		)
 		self.SetSizer(main_sizer)
-		self.SetMinSize((320, 360))
+		self.SetMinSize((360, 360))
 
 		self._apply_filter("")
-		wx.CallAfter(self.filter_input.SetFocus)
+		wx.CallAfter(self.results_list.SetFocus)
 
 	def get_selected_entry(self) -> CatalogEntry | None:
 		"""Return the currently selected entry, or ``None``."""
 
-		index = self.results_list.GetFirstSelected()
-		if index == -1 or index >= len(self._visible_entries):
+		index = self.results_list.GetSelection()
+		if index == wx.NOT_FOUND or index >= len(self._visible_entries):
 			return None
 		return self._visible_entries[index]
 
+	def _row_label(self, entry: CatalogEntry) -> str:
+		text, _, _ = build_insertion(entry, self._decimal_separator)
+		return f"{entry.display_name} — {text}"
+
 	def _apply_filter(self, query: str) -> None:
 		self._visible_entries = filter_catalog_entries(self._all_entries, query)
-		self.results_list.DeleteAllItems()
-		for row, entry in enumerate(self._visible_entries):
-			self.results_list.InsertItem(row, entry.name)
-			self.results_list.SetItem(row, 1, entry.insert_text)
+		self.results_list.Set(
+			[self._row_label(entry) for entry in self._visible_entries]
+		)
 		if self._visible_entries:
-			self._select_row(0)
+			self.results_list.SetSelection(0)
 		self._update_ok_enabled()
-
-	def _select_row(self, index: int) -> None:
-		for row in range(self.results_list.GetItemCount()):
-			self.results_list.Select(row, on=(row == index))
-		self.results_list.EnsureVisible(index)
 
 	def _move_selection(self, delta: int) -> None:
 		count = len(self._visible_entries)
 		if not count:
 			return
-		current = self.results_list.GetFirstSelected()
-		current = 0 if current == -1 else current
+		current = self.results_list.GetSelection()
+		current = 0 if current == wx.NOT_FOUND else current
 		new_index = max(0, min(count - 1, current + delta))
-		self._select_row(new_index)
+		self.results_list.SetSelection(new_index)
 
 	def _update_ok_enabled(self) -> None:
 		ok_button = self.FindWindowById(wx.ID_OK)
@@ -128,7 +135,7 @@ class FunctionIndexDialog(wx.Dialog):
 		self._apply_filter(self.filter_input.GetValue())
 		event.Skip()
 
-	def _on_filter_key_down(self, event: wx.KeyEvent) -> None:
+	def _on_navigation_key_down(self, event: wx.KeyEvent) -> None:
 		key = event.GetKeyCode()
 		if key == wx.WXK_DOWN:
 			self._move_selection(1)
@@ -141,5 +148,5 @@ class FunctionIndexDialog(wx.Dialog):
 		else:
 			event.Skip()
 
-	def _on_list_item_activated(self, event: wx.ListEvent) -> None:
+	def _on_list_item_activated(self, event: wx.CommandEvent) -> None:
 		self.EndModal(wx.ID_OK)
