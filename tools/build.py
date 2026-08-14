@@ -20,6 +20,8 @@ import zipfile
 from powercalc.version import get_version
 from powercalc.settings import PORTABLE_MARKER_NAME
 
+from tools.i18n import compile_catalogs
+
 
 APP_NAME = "Powercalc"
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -27,6 +29,7 @@ BUILD_ROOT = PROJECT_ROOT / "build"
 DIST_ROOT = PROJECT_ROOT / "dist"
 RELEASE_ROOT = DIST_ROOT / "release"
 ICON_PATH = PROJECT_ROOT / "assets" / "powercalc.ico"
+LOCALE_PATH = PROJECT_ROOT / "powercalc" / "locale"
 INNO_SCRIPT = PROJECT_ROOT / "installer" / "powercalc.iss"
 
 
@@ -88,6 +91,8 @@ def build_pyinstaller_bundle() -> Path:
 	if not ICON_PATH.exists():
 		raise BuildError(f"Missing Windows icon: {ICON_PATH}")
 
+	compile_catalogs()
+
 	bundle_path = get_bundle_path()
 	remove_path(bundle_path)
 
@@ -104,6 +109,8 @@ def build_pyinstaller_bundle() -> Path:
 		str(ICON_PATH),
 		"--add-data",
 		f"{ICON_PATH}{os.pathsep}assets",
+		"--add-data",
+		f"{LOCALE_PATH}{os.pathsep}locale",
 		"--exclude-module",
 		"pytest",
 		"--exclude-module",

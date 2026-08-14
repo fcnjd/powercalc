@@ -31,8 +31,10 @@ Development is intentionally incremental:
 - Prefer small, testable modules.
 - Add dependencies only when they serve a clear current purpose.
 - Code, API names, error codes, internal messages, and docstrings must be
-  written in English. User-visible localization will be added through the i18n
-  layer later.
+  written in English. This also applies to translatable source strings
+  (`_()` msgids): the English text lives in the code, and translations
+  (currently German) live in `powercalc/locale/` — see "Internationalization"
+  below.
 - Update this file when project structure, tooling, dependencies, architecture,
   or workflow decisions change.
 
@@ -74,6 +76,14 @@ powercalc/
 		formatting.py
 		index_dialog.py
 		main_window.py
+	i18n/
+		__init__.py
+	locale/
+		powercalc.pot
+		de/
+			LC_MESSAGES/
+				powercalc.po
+				powercalc.mo
 assets/
 	powercalc.ico
 	source/
@@ -86,24 +96,19 @@ tests/
 	test_gui_formatting.py
 	test_gui_import.py
 	test_gui_index_dialog.py
+	test_i18n.py
 	test_settings.py
 tools/
 	build.py
 	check_version.py
+	i18n.py
 	release_notes.py
 .github/
 	workflows/
 		ci.yml
 		release.yml
+babel.cfg
 main.py
-```
-
-Expected later extensions:
-
-```text
-powercalc/
-	i18n/
-		...
 ```
 
 ## Architecture Guidelines
@@ -137,7 +142,12 @@ The first wxPython GUI increment is intentionally small and keyboard-first:
 - menus are File, Edit, Options, and Help; Alt-key letters are reserved for
   menu access
 - the Options menu uses native radio and check menu items for angle unit,
-  decimal separator, number domain, logarithm mode, and error sound
+  decimal separator, number domain, logarithm mode, error sound, and
+  language (System/English/Deutsch)
+- changing the language saves immediately like other options, but only
+  takes effect after restarting Powercalc (no live retranslation); unlike
+  other options, this is confirmed with a modal dialog rather than a status
+  bar message, since it is easy to miss and more consequential
 - decimal precision is set through a small native dialog and is limited to
   1 through 100 significant digits
 - option changes apply to the next calculation, save immediately, and do not
@@ -283,14 +293,45 @@ to graphics:
 
 ## Internationalization
 
-- Keep code and internal strings English.
-- Do not scatter final user-facing strings throughout the codebase.
-- Use a translation-friendly boundary when GUI text is introduced.
-- Keep translatable UI text separate from technical diagnostics.
-- English and German are the likely first languages.
-- Runtime localization should start with the Python standard-library
-  `gettext`; optional workflow tools such as Babel or `polib` can be added when
-  translation files are introduced.
+- All translatable, user-facing strings are wrapped in `_(...)`. `_` is
+  installed globally into `builtins` by `powercalc.i18n` (Python
+  stdlib `gettext`), not imported per module.
+  `powercalc/__init__.py` installs an English passthrough translation as a
+  side effect of the package import, so `_` always exists — including in
+  tests and tools that import `powercalc.core`/`powercalc.gui` directly.
+- `_()` msgids are English source strings, same as the rest of the code (see
+  "Core Principles"). Do not scatter untranslated literals through GUI code
+  or `core/catalog.py`; every user-facing string must go through `_()`.
+- Keep translatable UI text separate from technical diagnostics:
+  `CalculationError.message` (from `powercalc.core`) is intentionally still
+  an untranslated English default for now; only the GUI-side prefix around
+  it is translated (see `powercalc/gui/formatting.py`). Full error-message
+  localization would require `calculator.py` to carry structured error
+  parameters instead of pre-formatted strings, and is deliberately deferred.
+- English and German are the shipped languages; German preserves the
+  descriptive catalog wording used before this was introduced (e.g.
+  "Quadratwurzel von n" for "Square root of n").
+- Translation catalogs live in `powercalc/locale/<language>/LC_MESSAGES/
+  powercalc.{po,mo}`; both `.po` and `.mo` are committed so the app runs
+  directly from the source tree without a Babel build step. Regenerate them
+  with `tools/i18n.py` (see "Tooling") after changing translatable strings.
+- The startup language is resolved once, from `AppSettings.language`
+  (`"system"`/`"en"`/`"de"`, default `"system"`) via
+  `powercalc.i18n.resolve_startup_language`, which detects the Windows UI
+  language for `"system"` and falls back to English. `main.py` resolves and
+  installs the language *before* importing `powercalc.gui` (which
+  transitively imports `powercalc.core.catalog`, evaluated once at import
+  time) — this ordering is required, since `_()` calls at module level only
+  observe whichever translation is installed when that module first loads.
+- Changing the language in the GUI is restart-required, not live: this
+  keeps `FUNCTION_CATALOG` a simple, eagerly-built module constant (no
+  Core API change) instead of a function that must be rebuilt per language.
+- `gui/app.py::run()` also sets a `wx.Locale` matching the resolved
+  language, so native wx stock labels (e.g. dialog OK/Cancel) follow suit;
+  `gettext` alone only covers Powercalc's own strings.
+- `_` is not a normal Python builtin, so `pyproject.toml`'s
+  `[tool.ruff] builtins = ["_"]` tells Ruff/pyflakes not to flag it as
+  undefined.
 
 ## Dependency Rules
 
@@ -312,10 +353,15 @@ uv add --dev <package>
 Optional extras or dependency groups should be introduced only when the related
 project phase is actually implemented.
 
+Current development-only dependency:
+
+- `babel` — extracts and compiles gettext catalogs via `tools/i18n.py`; not
+  needed at runtime (the app only uses stdlib `gettext`)
+
 Planned but not yet added:
 
 - quality/testing: `pytest-cov`, `hypothesis`, `mypy`, `pre-commit`
-- translation workflow: `Babel`, `polib`
+- translation workflow: `polib` (only if a need beyond Babel appears)
 - plotting/value tables: `numpy`, `matplotlib`
 - export/tactile graphics: `svgwrite`, `Pillow`, `reportlab`
 - advanced mathematics: `scipy`, possibly `lark`
@@ -338,6 +384,9 @@ uv run ruff format --check .
 uv run python -m tools.build portable
 uv run python -m tools.build installer
 uv run python -m tools.build all
+uv run python -m tools.i18n extract
+uv run python -m tools.i18n update
+uv run python -m tools.i18n compile
 ```
 
 Ruff conventions from `pyproject.toml`:

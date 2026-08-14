@@ -22,6 +22,7 @@ def test_settings_round_trip(tmp_path):
 		log_mode="natural",
 		angle_unit="degree",
 		play_error_sound=False,
+		language="de",
 	)
 
 	store.save(settings)
@@ -75,6 +76,37 @@ def test_invalid_values_are_replaced_field_by_field(tmp_path):
 		]
 		== "point"
 	)
+
+
+def test_invalid_language_is_replaced_with_default(tmp_path):
+	path = tmp_path / "settings.json"
+	path.write_text(
+		json.dumps(
+			{
+				"schema_version": 1,
+				"localization": {"language": "fr"},
+			}
+		),
+		encoding="utf-8",
+	)
+
+	loaded = SettingsStore(path).load()
+
+	assert loaded.warning is not None
+	assert loaded.settings.language == "system"
+
+
+def test_language_round_trips_through_localization_block(tmp_path):
+	path = tmp_path / "settings.json"
+	store = SettingsStore(path)
+
+	store.save(AppSettings(language="en"))
+
+	assert (
+		json.loads(path.read_text(encoding="utf-8"))["localization"]["language"]
+		== "en"
+	)
+	assert SettingsStore(path).load().settings.language == "en"
 
 
 def test_invalid_json_is_backed_up_and_repaired(tmp_path):

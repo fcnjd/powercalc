@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import replace
 from functools import partial
 
@@ -30,7 +31,7 @@ ID_ERROR_SOUND = wx.NewIdRef()
 ID_FUNCTION_INDEX = wx.NewIdRef()
 ID_RESTORE_DEFAULTS = wx.NewIdRef()
 
-KEYBOARD_HELP = """Keyboard commands:
+KEYBOARD_HELP = _("""Keyboard commands:
 
 Enter in expression input: Calculate.
 Tab and Shift+Tab: Move between controls.
@@ -47,18 +48,18 @@ Options use arrow keys and Enter. Escape closes a menu without changes.
 In decimal comma mode, use semicolons between function arguments.
 Alt+H, A: Show version information.
 Alt+F, Alt+E, Alt+O, Alt+H: Open menus.
-Alt+F4: Exit."""
+Alt+F4: Exit.""")
 
 
 class DecimalPrecisionDialog(wx.Dialog):
 	"""Small accessible dialog for choosing decimal precision."""
 
 	def __init__(self, parent: wx.Window, value: int) -> None:
-		super().__init__(parent, title="Decimal Precision")
+		super().__init__(parent, title=_("Decimal Precision"))
 		main_sizer = wx.BoxSizer(wx.VERTICAL)
 		label = wx.StaticText(
 			self,
-			label="Decimal precision, from 1 to 100",
+			label=_("Decimal precision, from 1 to 100"),
 		)
 		self.precision_input = wx.SpinCtrl(
 			self,
@@ -66,7 +67,7 @@ class DecimalPrecisionDialog(wx.Dialog):
 			max=100,
 			initial=value,
 		)
-		self.precision_input.SetName("Decimal precision, 1 to 100")
+		self.precision_input.SetName(_("Decimal precision, 1 to 100"))
 
 		main_sizer.Add(
 			label,
@@ -130,7 +131,7 @@ class MainFrame(wx.Frame):
 		self._create_menu_bar()
 		self._create_controls()
 		self.CreateStatusBar()
-		self.SetStatusText("Ready.")
+		self.SetStatusText(_("Ready."))
 		wx.CallAfter(self._finish_startup, startup_warning)
 
 	def _create_menu_bar(self) -> None:
@@ -139,95 +140,127 @@ class MainFrame(wx.Frame):
 		file_menu = wx.Menu()
 		exit_item = file_menu.Append(
 			wx.ID_EXIT,
-			"E&xit",
-			"Exit Powercalc",
+			_("E&xit"),
+			_("Exit Powercalc"),
 		)
 		self.Bind(wx.EVT_MENU, self._on_exit, exit_item)
-		menu_bar.Append(file_menu, "&File")
+		menu_bar.Append(file_menu, _("&File"))
 
 		edit_menu = wx.Menu()
 		clear_item = edit_menu.Append(
 			ID_CLEAR_INPUT,
-			"Clear &Input\tCtrl+L",
-			"Clear the expression input",
+			_("Clear &Input\tCtrl+L"),
+			_("Clear the expression input"),
 		)
 		copy_item = edit_menu.Append(
 			ID_COPY_RESULT,
-			"Copy &Result",
-			"Copy the result output",
+			_("Copy &Result"),
+			_("Copy the result output"),
 		)
 		index_item = edit_menu.Append(
 			ID_FUNCTION_INDEX,
-			"&Function Index...\tCtrl+Shift+X",
-			"Open the function and constant index",
+			_("&Function Index...\tCtrl+Shift+X"),
+			_("Open the function and constant index"),
 		)
 		self.Bind(wx.EVT_MENU, self._on_clear_input, clear_item)
 		self.Bind(wx.EVT_MENU, self._on_copy_result, copy_item)
 		self.Bind(wx.EVT_MENU, self._on_function_index, index_item)
-		menu_bar.Append(edit_menu, "&Edit")
+		menu_bar.Append(edit_menu, _("&Edit"))
 
 		options_menu = wx.Menu()
 		self._option_items: dict[str, dict[object, wx.MenuItem]] = {}
 		self._add_radio_submenu(
 			options_menu,
-			"&Angle Unit",
+			_("&Angle Unit"),
 			"angle_unit",
 			[
-				("&Radians", "radian", "Angle unit: Radians."),
-				("&Degrees", "degree", "Angle unit: Degrees."),
-				("&Gradians", "gradian", "Angle unit: Gradians."),
+				(_("&Radians"), "radian", _("Angle unit: Radians.")),
+				(_("&Degrees"), "degree", _("Angle unit: Degrees.")),
+				(_("&Gradians"), "gradian", _("Angle unit: Gradians.")),
 			],
 		)
 		self._add_radio_submenu(
 			options_menu,
-			"&Decimal Separator",
+			_("&Decimal Separator"),
 			"decimal_separator",
 			[
 				(
-					"&Point (1.5; arguments use commas)",
+					_("&Point (1.5; arguments use commas)"),
 					"point",
-					"Decimal separator: Point.",
+					_("Decimal separator: Point."),
 				),
 				(
-					"&Comma (1,5; arguments use semicolons)",
+					_("&Comma (1,5; arguments use semicolons)"),
 					"comma",
-					"Decimal separator: Comma.",
+					_("Decimal separator: Comma."),
 				),
 			],
 		)
 		self._add_radio_submenu(
 			options_menu,
-			"&Number Domain",
+			_("&Number Domain"),
 			"number_domain",
 			[
-				("&Complex", "complex", "Number domain: Complex."),
-				("&Real Only", "real", "Number domain: Real only."),
+				(_("&Complex"), "complex", _("Number domain: Complex.")),
+				(_("&Real Only"), "real", _("Number domain: Real only.")),
 			],
 		)
 		self._add_radio_submenu(
 			options_menu,
-			"&Logarithm Mode",
+			_("&Logarithm Mode"),
 			"log_mode",
 			[
-				("&Base 10", "calculator", "Logarithm mode: Base 10."),
-				("&Natural", "natural", "Logarithm mode: Natural."),
+				(_("&Base 10"), "calculator", _("Logarithm mode: Base 10.")),
+				(_("&Natural"), "natural", _("Logarithm mode: Natural.")),
 			],
+		)
+		self._add_radio_submenu(
+			options_menu,
+			_("&Language"),
+			"language",
+			[
+				(
+					_("&System"),
+					"system",
+					_(
+						"Language set to System. Restart Powercalc for the "
+						"change to take effect."
+					),
+				),
+				(
+					"&English",
+					"en",
+					_(
+						"Language set to English. Restart Powercalc for the "
+						"change to take effect."
+					),
+				),
+				(
+					"&Deutsch",
+					"de",
+					_(
+						"Language set to Deutsch. Restart Powercalc for the "
+						"change to take effect."
+					),
+				),
+			],
+			on_select=self._on_language_choice,
 		)
 		self._precision_item = options_menu.Append(
 			ID_DECIMAL_PRECISION,
-			"Decimal &Precision...",
-			"Set significant decimal digits",
+			_("Decimal &Precision..."),
+			_("Set significant decimal digits"),
 		)
 		self._sound_item = options_menu.AppendCheckItem(
 			ID_ERROR_SOUND,
-			"Play &Sound on Calculation Errors",
-			"Play a system sound when a calculation fails",
+			_("Play &Sound on Calculation Errors"),
+			_("Play a system sound when a calculation fails"),
 		)
 		options_menu.AppendSeparator()
 		restore_item = options_menu.Append(
 			ID_RESTORE_DEFAULTS,
-			"&Restore Defaults...",
-			"Restore all calculation options to their defaults",
+			_("&Restore Defaults..."),
+			_("Restore all calculation options to their defaults"),
 		)
 		self.Bind(
 			wx.EVT_MENU,
@@ -236,23 +269,23 @@ class MainFrame(wx.Frame):
 		)
 		self.Bind(wx.EVT_MENU, self._on_error_sound, self._sound_item)
 		self.Bind(wx.EVT_MENU, self._on_restore_defaults, restore_item)
-		menu_bar.Append(options_menu, "&Options")
+		menu_bar.Append(options_menu, _("&Options"))
 		self._sync_options_menu()
 
 		help_menu = wx.Menu()
 		commands_item = help_menu.Append(
 			wx.ID_HELP,
-			"&Keyboard Commands\tF1",
-			"Show keyboard commands",
+			_("&Keyboard Commands\tF1"),
+			_("Show keyboard commands"),
 		)
 		about_item = help_menu.Append(
 			wx.ID_ABOUT,
-			"&About Powercalc",
-			"Show Powercalc version information",
+			_("&About Powercalc"),
+			_("Show Powercalc version information"),
 		)
 		self.Bind(wx.EVT_MENU, self._on_keyboard_help, commands_item)
 		self.Bind(wx.EVT_MENU, self._on_about, about_item)
-		menu_bar.Append(help_menu, "&Help")
+		menu_bar.Append(help_menu, _("&Help"))
 
 		self.SetMenuBar(menu_bar)
 
@@ -262,15 +295,18 @@ class MainFrame(wx.Frame):
 		label: str,
 		field: str,
 		choices: list[tuple[str, object, str]],
+		*,
+		on_select: Callable[..., None] | None = None,
 	) -> None:
 		submenu = wx.Menu()
 		items: dict[object, wx.MenuItem] = {}
+		handler = on_select or self._on_choice_setting
 		for item_label, value, status in choices:
 			item = submenu.AppendRadioItem(wx.ID_ANY, item_label)
 			self.Bind(
 				wx.EVT_MENU,
 				partial(
-					self._on_choice_setting,
+					handler,
 					field=field,
 					value=value,
 					status=status,
@@ -286,7 +322,9 @@ class MainFrame(wx.Frame):
 			items[getattr(self.settings, field)].Check(True)
 		self._sound_item.Check(self.settings.play_error_sound)
 		self._precision_item.SetItemLabel(
-			f"Decimal &Precision... ({self.settings.decimal_precision})"
+			_("Decimal &Precision... ({precision})").format(
+				precision=self.settings.decimal_precision
+			)
 		)
 
 	def _set_window_icon(self) -> None:
@@ -298,16 +336,16 @@ class MainFrame(wx.Frame):
 		panel = wx.Panel(self)
 		main_sizer = wx.BoxSizer(wx.VERTICAL)
 
-		expression_label = wx.StaticText(panel, label="Expression")
+		expression_label = wx.StaticText(panel, label=_("Expression"))
 		self.expression_input = wx.TextCtrl(
 			panel,
 			style=wx.TE_PROCESS_ENTER,
 		)
-		self.expression_input.SetName("Expression input")
+		self.expression_input.SetName(_("Expression input"))
 		self.expression_input.Bind(wx.EVT_TEXT_ENTER, self._on_calculate)
 
-		self.calculate_button = wx.Button(panel, label="Calculate")
-		self.calculate_button.SetName("Calculate")
+		self.calculate_button = wx.Button(panel, label=_("Calculate"))
+		self.calculate_button.SetName(_("Calculate"))
 		self.calculate_button.Bind(wx.EVT_BUTTON, self._on_calculate)
 
 		input_row = wx.BoxSizer(wx.HORIZONTAL)
@@ -317,9 +355,9 @@ class MainFrame(wx.Frame):
 		)
 		input_row.Add(self.calculate_button, wx.SizerFlags(0))
 
-		result_label = wx.StaticText(panel, label="Result")
+		result_label = wx.StaticText(panel, label=_("Result"))
 		self.result_output = KeyboardFocusableReadOnlyTextCtrl(panel)
-		self.result_output.SetName("Result output")
+		self.result_output.SetName(_("Result output"))
 		self.calculate_button.MoveAfterInTabOrder(self.expression_input)
 		self.result_output.MoveAfterInTabOrder(self.calculate_button)
 
@@ -353,11 +391,11 @@ class MainFrame(wx.Frame):
 				outcome.result,
 				self.settings.decimal_separator,
 			)
-			status_text = "Calculation complete."
+			status_text = _("Calculation complete.")
 		else:
 			assert outcome.error is not None
 			output_text = format_error_for_display(outcome.error)
-			status_text = "Calculation failed."
+			status_text = _("Calculation failed.")
 
 		self.result_output.SetValue(output_text)
 		if not outcome.ok and self.settings.play_error_sound:
@@ -381,6 +419,29 @@ class MainFrame(wx.Frame):
 		self.SetStatusText(status)
 		event.Skip(False)
 
+	def _on_language_choice(
+		self,
+		event: wx.Event,
+		*,
+		field: str,
+		value: object,
+		status: str,
+	) -> None:
+		self.settings = replace(self.settings, **{field: value})
+		self._sync_options_menu()
+		self._save_settings()
+		dialog = wx.MessageDialog(
+			self,
+			status,
+			_("Language Changed"),
+			wx.OK | wx.ICON_INFORMATION,
+		)
+		try:
+			dialog.ShowModal()
+		finally:
+			dialog.Destroy()
+		event.Skip(False)
+
 	def _on_decimal_precision(self, event: wx.Event) -> None:
 		dialog = DecimalPrecisionDialog(
 			self,
@@ -400,7 +461,9 @@ class MainFrame(wx.Frame):
 		)
 		self._sync_options_menu()
 		self._save_settings()
-		self.SetStatusText(f"Decimal precision: {precision}.")
+		self.SetStatusText(
+			_("Decimal precision: {precision}.").format(precision=precision)
+		)
 		event.Skip(False)
 
 	def _on_error_sound(self, event: wx.CommandEvent) -> None:
@@ -410,15 +473,15 @@ class MainFrame(wx.Frame):
 		)
 		self._sync_options_menu()
 		self._save_settings()
-		state = "on" if self.settings.play_error_sound else "off"
-		self.SetStatusText(f"Error sound: {state}.")
+		state = _("on") if self.settings.play_error_sound else _("off")
+		self.SetStatusText(_("Error sound: {state}.").format(state=state))
 		event.Skip(False)
 
 	def _on_restore_defaults(self, event: wx.Event) -> None:
 		dialog = wx.MessageDialog(
 			self,
-			"Restore all calculation options to their default values?",
-			"Restore Defaults",
+			_("Restore all calculation options to their default values?"),
+			_("Restore Defaults"),
 			wx.YES_NO | wx.NO_DEFAULT | wx.ICON_QUESTION,
 		)
 		try:
@@ -429,7 +492,7 @@ class MainFrame(wx.Frame):
 			self.settings = AppSettings()
 			self._sync_options_menu()
 			self._save_settings()
-			self.SetStatusText("Default options restored.")
+			self.SetStatusText(_("Default options restored."))
 		event.Skip(False)
 
 	def _save_settings(self) -> None:
@@ -437,8 +500,10 @@ class MainFrame(wx.Frame):
 			self.settings_store.save(self.settings)
 		except SettingsSaveError:
 			self._show_warning(
-				"The options are active for this session but could not be "
-				"saved."
+				_(
+					"The options are active for this session but could not "
+					"be saved."
+				)
 			)
 
 	def _finish_startup(self, warning: str | None) -> None:
@@ -450,7 +515,7 @@ class MainFrame(wx.Frame):
 		dialog = wx.MessageDialog(
 			self,
 			message,
-			"Powercalc Settings",
+			_("Powercalc Settings"),
 			wx.OK | wx.ICON_WARNING,
 		)
 		try:
@@ -461,24 +526,24 @@ class MainFrame(wx.Frame):
 	def _on_clear_input(self, event: wx.Event) -> None:
 		self.expression_input.Clear()
 		self.expression_input.SetFocus()
-		self.SetStatusText("Input cleared.")
+		self.SetStatusText(_("Input cleared."))
 		event.Skip(False)
 
 	def _on_copy_result(self, event: wx.Event) -> None:
 		text = self.result_output.GetValue()
 		if not text:
-			self.SetStatusText("No result to copy.")
+			self.SetStatusText(_("No result to copy."))
 			event.Skip(False)
 			return
 
 		if not wx.TheClipboard.Open():
-			self.SetStatusText("Clipboard is not available.")
+			self.SetStatusText(_("Clipboard is not available."))
 			event.Skip(False)
 			return
 
 		try:
 			wx.TheClipboard.SetData(wx.TextDataObject(text))
-			self.SetStatusText("Result copied.")
+			self.SetStatusText(_("Result copied."))
 		finally:
 			wx.TheClipboard.Close()
 		event.Skip(False)
@@ -516,13 +581,15 @@ class MainFrame(wx.Frame):
 				insertion_point + start, insertion_point + end
 			)
 		self.expression_input.SetFocus()
-		self.SetStatusText(f"Inserted {entry.display_name}.")
+		self.SetStatusText(
+			_("Inserted {name}.").format(name=entry.display_name)
+		)
 
 	def _on_keyboard_help(self, event: wx.Event) -> None:
 		dialog = wx.MessageDialog(
 			self,
 			KEYBOARD_HELP,
-			"Keyboard Commands",
+			_("Keyboard Commands"),
 			wx.OK | wx.ICON_INFORMATION,
 		)
 		try:
@@ -534,12 +601,12 @@ class MainFrame(wx.Frame):
 	def _on_about(self, event: wx.Event) -> None:
 		dialog = wx.MessageDialog(
 			self,
-			(
-				f"Powercalc {get_version()}\n\n"
+			_(
+				"Powercalc {version}\n\n"
 				"Accessible desktop calculator.\n"
 				"Updates are available from GitHub Releases."
-			),
-			"About Powercalc",
+			).format(version=get_version()),
+			_("About Powercalc"),
 			wx.OK | wx.ICON_INFORMATION,
 		)
 		try:

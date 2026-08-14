@@ -1,0 +1,537 @@
+# German translations for Powercalc.
+# Copyright (C) 2026 Powercalc
+# This file is distributed under the same license as the Powercalc project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Powercalc VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2026-08-14 11:31+0200\n"
+"PO-Revision-Date: 2026-08-14 10:56+0200\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: de\n"
+"Language-Team: de <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.18.0\n"
+
+#: powercalc/core/catalog.py:59
+msgid "Absolute value of n"
+msgstr "Betrag von n"
+
+#: powercalc/core/catalog.py:60
+msgid "Arccosine (current angle unit)"
+msgstr "Arkuskosinus (aktuelle Winkeleinheit)"
+
+#: powercalc/core/catalog.py:61
+msgid "Arcsine (current angle unit)"
+msgstr "Arkussinus (aktuelle Winkeleinheit)"
+
+#: powercalc/core/catalog.py:62
+msgid "Arctangent (current angle unit)"
+msgstr "Arkustangens (aktuelle Winkeleinheit)"
+
+#: powercalc/core/catalog.py:63
+msgid "Circle constant pi"
+msgstr "Kreiszahl Pi"
+
+#: powercalc/core/catalog.py:64
+msgid "Cosine (current angle unit)"
+msgstr "Kosinus (aktuelle Winkeleinheit)"
+
+#: powercalc/core/catalog.py:65
+msgid "Euler's number e"
+msgstr "Eulersche Zahl e"
+
+#: powercalc/core/catalog.py:66
+msgid "Exponential function e to the power of n"
+msgstr "Exponentialfunktion e hoch n"
+
+#: powercalc/core/catalog.py:67
+msgid "Factorial of n"
+msgstr "Fakultät von n"
+
+#: powercalc/core/catalog.py:68
+msgid "Gamma function of n"
+msgstr "Gammafunktion von n"
+
+#: powercalc/core/catalog.py:69
+msgid "Hyperbolic cosine of n"
+msgstr "Kosinus hyperbolicus von n"
+
+#: powercalc/core/catalog.py:70
+msgid "Hyperbolic sine of n"
+msgstr "Sinus hyperbolicus von n"
+
+#: powercalc/core/catalog.py:71
+msgid "Hyperbolic tangent of n"
+msgstr "Tangens hyperbolicus von n"
+
+#: powercalc/core/catalog.py:72
+msgid "Imaginary part of n"
+msgstr "Imaginärteil von n"
+
+#: powercalc/core/catalog.py:73
+msgid "Imaginary unit i"
+msgstr "Imaginäre Einheit i"
+
+#: powercalc/core/catalog.py:74
+msgid "Infinity"
+msgstr "Unendlich"
+
+#: powercalc/core/catalog.py:75
+msgid "Largest of several values"
+msgstr "Größter von mehreren Werten"
+
+#: powercalc/core/catalog.py:76
+msgid "Logarithm of n to base 10"
+msgstr "Logarithmus von n zur Basis 10"
+
+#: powercalc/core/catalog.py:77
+msgid "Logarithm of n to base a"
+msgstr "Logarithmus von n zur Basis a"
+
+#: powercalc/core/catalog.py:78
+msgid "Logarithm of n, natural (base e)"
+msgstr "Logarithmus von n, natürlich (Basis e)"
+
+#: powercalc/core/catalog.py:79
+msgid "Real part of n"
+msgstr "Realteil von n"
+
+#: powercalc/core/catalog.py:80
+msgid "Round n down to the nearest integer"
+msgstr "Abrunden von n zur nächsten ganzen Zahl"
+
+#: powercalc/core/catalog.py:81
+msgid "Round n up to the nearest integer"
+msgstr "Aufrunden von n zur nächsten ganzen Zahl"
+
+#: powercalc/core/catalog.py:82
+msgid "Sign of n"
+msgstr "Vorzeichen von n"
+
+#: powercalc/core/catalog.py:83
+msgid "Sine (current angle unit)"
+msgstr "Sinus (aktuelle Winkeleinheit)"
+
+#: powercalc/core/catalog.py:84
+msgid "Smallest of several values"
+msgstr "Kleinster von mehreren Werten"
+
+#: powercalc/core/catalog.py:85
+msgid "Square root of n"
+msgstr "Quadratwurzel von n"
+
+#: powercalc/core/catalog.py:86
+msgid "Tangent (current angle unit)"
+msgstr "Tangens (aktuelle Winkeleinheit)"
+
+#: powercalc/core/catalog.py:87
+msgid "Tau (2π)"
+msgstr "Tau (2π)"
+
+#: powercalc/gui/formatting.py:28
+#, python-brace-format
+msgid "Error: {message}"
+msgstr "Fehler: {message}"
+
+#: powercalc/gui/index_dialog.py:43
+msgid "Function and Constant Index"
+msgstr "Funktions- und Konstantenindex"
+
+#: powercalc/gui/index_dialog.py:55
+msgid "Search"
+msgstr "Suche"
+
+#: powercalc/gui/index_dialog.py:57
+msgid "Filter functions and constants"
+msgstr "Funktionen und Konstanten filtern"
+
+#: powercalc/gui/index_dialog.py:62
+msgid "Functions and constants"
+msgstr "Funktionen und Konstanten"
+
+#: powercalc/gui/main_window.py:34
+msgid ""
+"Keyboard commands:\n"
+"\n"
+"Enter in expression input: Calculate.\n"
+"Tab and Shift+Tab: Move between controls.\n"
+"Ctrl+L: Clear expression input.\n"
+"Ctrl+C in result output: Copy selected result.\n"
+"Ctrl+Shift+X: Open function and constant index.\n"
+"The index opens with the list focused; type a letter to jump, or use\n"
+"arrow keys and Enter. Tab reaches a search field that filters by\n"
+"substring. Escape closes without inserting. Inserting selects the\n"
+"first argument so it can be typed over immediately.\n"
+"F1: Show this help.\n"
+"Alt+O: Open calculation options.\n"
+"Options use arrow keys and Enter. Escape closes a menu without changes.\n"
+"In decimal comma mode, use semicolons between function arguments.\n"
+"Alt+H, A: Show version information.\n"
+"Alt+F, Alt+E, Alt+O, Alt+H: Open menus.\n"
+"Alt+F4: Exit."
+msgstr ""
+"Tastaturbefehle:\n"
+"\n"
+"Eingabetaste in der Ausdruckseingabe: Berechnen.\n"
+"Tab und Umschalt+Tab: Zwischen den Steuerelementen wechseln.\n"
+"Strg+L: Ausdruckseingabe löschen.\n"
+"Strg+C in der Ergebnisausgabe: Ausgewähltes Ergebnis kopieren.\n"
+"Strg+Umschalt+X: Funktions- und Konstantenindex öffnen.\n"
+"Der Index öffnet sich mit Fokus auf der Liste; einen Buchstaben eingeben,"
+"\n"
+"um zu springen, oder die Pfeiltasten und die Eingabetaste verwenden. Tab\n"
+"erreicht ein Suchfeld, das nach Teilzeichenfolge filtert. Escape\n"
+"schließt, ohne einzufügen. Beim Einfügen wird das erste Argument\n"
+"ausgewählt, sodass es sofort überschrieben werden kann.\n"
+"F1: Diese Hilfe anzeigen.\n"
+"Alt+O: Berechnungsoptionen öffnen.\n"
+"In den Optionen die Pfeiltasten und die Eingabetaste verwenden. Escape\n"
+"schließt ein Menü ohne Änderungen.\n"
+"Im Dezimalkomma-Modus Semikolons zwischen Funktionsargumenten verwenden.\n"
+"Alt+H, Ü: Versionsinformationen anzeigen.\n"
+"Alt+D, Alt+B, Alt+O, Alt+H: Menüs öffnen.\n"
+"Alt+F4: Beenden."
+
+#: powercalc/gui/main_window.py:58
+msgid "Decimal Precision"
+msgstr "Dezimalgenauigkeit"
+
+#: powercalc/gui/main_window.py:62
+msgid "Decimal precision, from 1 to 100"
+msgstr "Dezimalgenauigkeit, von 1 bis 100"
+
+#: powercalc/gui/main_window.py:70
+msgid "Decimal precision, 1 to 100"
+msgstr "Dezimalgenauigkeit, 1 bis 100"
+
+#: powercalc/gui/main_window.py:134
+msgid "Ready."
+msgstr "Bereit."
+
+#: powercalc/gui/main_window.py:143
+msgid "E&xit"
+msgstr "Be&enden"
+
+#: powercalc/gui/main_window.py:144
+msgid "Exit Powercalc"
+msgstr "Powercalc beenden"
+
+#: powercalc/gui/main_window.py:147
+msgid "&File"
+msgstr "&Datei"
+
+#: powercalc/gui/main_window.py:152
+msgid "Clear &Input\tCtrl+L"
+msgstr "Eingabe &löschen\tCtrl+L"
+
+#: powercalc/gui/main_window.py:153
+msgid "Clear the expression input"
+msgstr "Die Ausdruckseingabe löschen"
+
+#: powercalc/gui/main_window.py:157
+msgid "Copy &Result"
+msgstr "&Ergebnis kopieren"
+
+#: powercalc/gui/main_window.py:158
+msgid "Copy the result output"
+msgstr "Die Ergebnisausgabe kopieren"
+
+#: powercalc/gui/main_window.py:162
+msgid "&Function Index...\tCtrl+Shift+X"
+msgstr "&Funktionsindex...\tCtrl+Shift+X"
+
+#: powercalc/gui/main_window.py:163
+msgid "Open the function and constant index"
+msgstr "Den Funktions- und Konstantenindex öffnen"
+
+#: powercalc/gui/main_window.py:168
+msgid "&Edit"
+msgstr "&Bearbeiten"
+
+#: powercalc/gui/main_window.py:174
+msgid "&Angle Unit"
+msgstr "&Winkeleinheit"
+
+#: powercalc/gui/main_window.py:177
+msgid "&Radians"
+msgstr "&Radiant"
+
+#: powercalc/gui/main_window.py:177
+msgid "Angle unit: Radians."
+msgstr "Winkeleinheit: Radiant."
+
+#: powercalc/gui/main_window.py:178
+msgid "&Degrees"
+msgstr "&Grad"
+
+#: powercalc/gui/main_window.py:178
+msgid "Angle unit: Degrees."
+msgstr "Winkeleinheit: Grad."
+
+#: powercalc/gui/main_window.py:179
+msgid "&Gradians"
+msgstr "&Neugrad"
+
+#: powercalc/gui/main_window.py:179
+msgid "Angle unit: Gradians."
+msgstr "Winkeleinheit: Neugrad."
+
+#: powercalc/gui/main_window.py:184
+msgid "&Decimal Separator"
+msgstr "&Dezimaltrennzeichen"
+
+#: powercalc/gui/main_window.py:188
+msgid "&Point (1.5; arguments use commas)"
+msgstr "&Punkt (1.5; Argumente mit Kommas)"
+
+#: powercalc/gui/main_window.py:190
+msgid "Decimal separator: Point."
+msgstr "Dezimaltrennzeichen: Punkt."
+
+#: powercalc/gui/main_window.py:193
+msgid "&Comma (1,5; arguments use semicolons)"
+msgstr "&Komma (1,5; Argumente mit Semikolons)"
+
+#: powercalc/gui/main_window.py:195
+msgid "Decimal separator: Comma."
+msgstr "Dezimaltrennzeichen: Komma."
+
+#: powercalc/gui/main_window.py:201
+msgid "&Number Domain"
+msgstr "&Zahlenbereich"
+
+#: powercalc/gui/main_window.py:204
+msgid "&Complex"
+msgstr "&Komplex"
+
+#: powercalc/gui/main_window.py:204
+msgid "Number domain: Complex."
+msgstr "Zahlenbereich: Komplex."
+
+#: powercalc/gui/main_window.py:205
+msgid "&Real Only"
+msgstr "&Nur reell"
+
+#: powercalc/gui/main_window.py:205
+msgid "Number domain: Real only."
+msgstr "Zahlenbereich: Nur reell."
+
+#: powercalc/gui/main_window.py:210
+msgid "&Logarithm Mode"
+msgstr "&Logarithmus-Modus"
+
+#: powercalc/gui/main_window.py:213
+msgid "&Base 10"
+msgstr "&Basis 10"
+
+#: powercalc/gui/main_window.py:213
+msgid "Logarithm mode: Base 10."
+msgstr "Logarithmus-Modus: Basis 10."
+
+#: powercalc/gui/main_window.py:214
+msgid "&Natural"
+msgstr "&Natürlich"
+
+#: powercalc/gui/main_window.py:214
+msgid "Logarithm mode: Natural."
+msgstr "Logarithmus-Modus: Natürlich."
+
+#: powercalc/gui/main_window.py:219
+msgid "&Language"
+msgstr "&Sprache"
+
+#: powercalc/gui/main_window.py:223
+msgid "&System"
+msgstr "&System"
+
+#: powercalc/gui/main_window.py:226
+msgid "Language set to System. Restart Powercalc for the change to take effect."
+msgstr ""
+"Sprache auf System gestellt. Powercalc muss neu gestartet werden, "
+"damit die Änderung wirksam wird."
+
+#: powercalc/gui/main_window.py:234
+msgid "Language set to English. Restart Powercalc for the change to take effect."
+msgstr ""
+"Sprache auf English gestellt. Powercalc muss neu gestartet werden, "
+"damit die Änderung wirksam wird."
+
+#: powercalc/gui/main_window.py:242
+msgid "Language set to Deutsch. Restart Powercalc for the change to take effect."
+msgstr ""
+"Sprache auf Deutsch gestellt. Powercalc muss neu gestartet werden, "
+"damit die Änderung wirksam wird."
+
+#: powercalc/gui/main_window.py:251
+msgid "Decimal &Precision..."
+msgstr "Dezimal&genauigkeit..."
+
+#: powercalc/gui/main_window.py:252
+msgid "Set significant decimal digits"
+msgstr "Anzahl signifikanter Dezimalstellen festlegen"
+
+#: powercalc/gui/main_window.py:256
+msgid "Play &Sound on Calculation Errors"
+msgstr "Ton bei &Rechenfehlern abspielen"
+
+#: powercalc/gui/main_window.py:257
+msgid "Play a system sound when a calculation fails"
+msgstr "Bei fehlgeschlagener Berechnung einen Systemton abspielen"
+
+#: powercalc/gui/main_window.py:262
+msgid "&Restore Defaults..."
+msgstr "&Voreinstellungen wiederherstellen..."
+
+#: powercalc/gui/main_window.py:263
+msgid "Restore all calculation options to their defaults"
+msgstr "Alle Berechnungsoptionen auf ihre Standardwerte zurücksetzen"
+
+#: powercalc/gui/main_window.py:272
+msgid "&Options"
+msgstr "&Optionen"
+
+#: powercalc/gui/main_window.py:278
+msgid "&Keyboard Commands\tF1"
+msgstr "&Tastaturbefehle\tF1"
+
+#: powercalc/gui/main_window.py:279
+msgid "Show keyboard commands"
+msgstr "Tastaturbefehle anzeigen"
+
+#: powercalc/gui/main_window.py:283
+msgid "&About Powercalc"
+msgstr "&Über Powercalc"
+
+#: powercalc/gui/main_window.py:284
+msgid "Show Powercalc version information"
+msgstr "Versionsinformationen zu Powercalc anzeigen"
+
+#: powercalc/gui/main_window.py:288
+msgid "&Help"
+msgstr "&Hilfe"
+
+#: powercalc/gui/main_window.py:325
+#, python-brace-format
+msgid "Decimal &Precision... ({precision})"
+msgstr "Dezimal&genauigkeit... ({precision})"
+
+#: powercalc/gui/main_window.py:339
+msgid "Expression"
+msgstr "Ausdruck"
+
+#: powercalc/gui/main_window.py:344
+msgid "Expression input"
+msgstr "Ausdruckseingabe"
+
+#: powercalc/gui/main_window.py:347 powercalc/gui/main_window.py:348
+msgid "Calculate"
+msgstr "Berechnen"
+
+#: powercalc/gui/main_window.py:358
+msgid "Result"
+msgstr "Ergebnis"
+
+#: powercalc/gui/main_window.py:360
+msgid "Result output"
+msgstr "Ergebnisausgabe"
+
+#: powercalc/gui/main_window.py:394
+msgid "Calculation complete."
+msgstr "Berechnung abgeschlossen."
+
+#: powercalc/gui/main_window.py:398
+msgid "Calculation failed."
+msgstr "Berechnung fehlgeschlagen."
+
+#: powercalc/gui/main_window.py:436
+msgid "Language Changed"
+msgstr "Sprache geändert"
+
+#: powercalc/gui/main_window.py:465
+#, python-brace-format
+msgid "Decimal precision: {precision}."
+msgstr "Dezimalgenauigkeit: {precision}."
+
+#: powercalc/gui/main_window.py:476
+msgid "on"
+msgstr "ein"
+
+#: powercalc/gui/main_window.py:476
+msgid "off"
+msgstr "aus"
+
+#: powercalc/gui/main_window.py:477
+#, python-brace-format
+msgid "Error sound: {state}."
+msgstr "Fehlerton: {state}."
+
+#: powercalc/gui/main_window.py:483
+msgid "Restore all calculation options to their default values?"
+msgstr "Alle Berechnungsoptionen auf ihre Standardwerte zurücksetzen?"
+
+#: powercalc/gui/main_window.py:484
+msgid "Restore Defaults"
+msgstr "Voreinstellungen wiederherstellen"
+
+#: powercalc/gui/main_window.py:495
+msgid "Default options restored."
+msgstr "Standardoptionen wiederhergestellt."
+
+#: powercalc/gui/main_window.py:504
+msgid "The options are active for this session but could not be saved."
+msgstr ""
+"Die Optionen sind für diese Sitzung aktiv, konnten aber nicht gespeichert"
+" werden."
+
+#: powercalc/gui/main_window.py:518
+msgid "Powercalc Settings"
+msgstr "Powercalc-Einstellungen"
+
+#: powercalc/gui/main_window.py:529
+msgid "Input cleared."
+msgstr "Eingabe gelöscht."
+
+#: powercalc/gui/main_window.py:535
+msgid "No result to copy."
+msgstr "Kein Ergebnis zum Kopieren."
+
+#: powercalc/gui/main_window.py:540
+msgid "Clipboard is not available."
+msgstr "Zwischenablage nicht verfügbar."
+
+#: powercalc/gui/main_window.py:546
+msgid "Result copied."
+msgstr "Ergebnis kopiert."
+
+#: powercalc/gui/main_window.py:585
+#, python-brace-format
+msgid "Inserted {name}."
+msgstr "{name} eingefügt."
+
+#: powercalc/gui/main_window.py:592
+msgid "Keyboard Commands"
+msgstr "Tastaturbefehle"
+
+#: powercalc/gui/main_window.py:605
+#, python-brace-format
+msgid ""
+"Powercalc {version}\n"
+"\n"
+"Accessible desktop calculator.\n"
+"Updates are available from GitHub Releases."
+msgstr ""
+"Powercalc {version}\n"
+"\n"
+"Barrierefreier Desktop-Rechner.\n"
+"Updates sind über GitHub Releases verfügbar."
+
+#: powercalc/gui/main_window.py:609
+msgid "About Powercalc"
+msgstr "Über Powercalc"
+

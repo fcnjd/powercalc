@@ -9,14 +9,16 @@ import os
 from pathlib import Path
 import sys
 import tempfile
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 from platformdirs import user_config_path
 
-from powercalc.core import EvaluationOptions
+if TYPE_CHECKING:
+	from powercalc.core import EvaluationOptions
 
 
 AngleUnit = Literal["radian", "degree", "gradian"]
+AppLanguage = Literal["system", "en", "de"]
 DecimalSeparator = Literal["point", "comma"]
 LogMode = Literal["calculator", "natural"]
 NumberDomain = Literal["complex", "real"]
@@ -40,9 +42,12 @@ class AppSettings:
 	log_mode: LogMode = "calculator"
 	angle_unit: AngleUnit = "radian"
 	play_error_sound: bool = True
+	language: AppLanguage = "system"
 
 	def evaluation_options(self) -> EvaluationOptions:
 		"""Return the calculation-core options represented by these settings."""
+
+		from powercalc.core import EvaluationOptions
 
 		return EvaluationOptions(
 			decimal_precision=self.decimal_precision,
@@ -178,6 +183,9 @@ def _settings_to_data(settings: AppSettings) -> dict[str, object]:
 		"accessibility": {
 			"play_error_sound": settings.play_error_sound,
 		},
+		"localization": {
+			"language": settings.language,
+		},
 	}
 
 
@@ -185,12 +193,16 @@ def _settings_from_data(data: dict[str, object]) -> tuple[AppSettings, bool]:
 	defaults = AppSettings()
 	calculation = data.get("calculation", {})
 	accessibility = data.get("accessibility", {})
+	localization = data.get("localization", {})
 	invalid = False
 	if not isinstance(calculation, dict):
 		calculation = {}
 		invalid = True
 	if not isinstance(accessibility, dict):
 		accessibility = {}
+		invalid = True
+	if not isinstance(localization, dict):
+		localization = {}
 		invalid = True
 
 	angle_unit, was_invalid = _choice_value(
@@ -219,6 +231,13 @@ def _settings_from_data(data: dict[str, object]) -> tuple[AppSettings, bool]:
 		"log_mode",
 		defaults.log_mode,
 		{"calculator", "natural"},
+	)
+	invalid |= was_invalid
+	language, was_invalid = _choice_value(
+		localization,
+		"language",
+		defaults.language,
+		{"system", "en", "de"},
 	)
 	invalid |= was_invalid
 
@@ -250,6 +269,7 @@ def _settings_from_data(data: dict[str, object]) -> tuple[AppSettings, bool]:
 			log_mode=log_mode,
 			angle_unit=angle_unit,
 			play_error_sound=play_error_sound,
+			language=language,
 		),
 		invalid,
 	)

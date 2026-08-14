@@ -40,7 +40,7 @@ class FunctionIndexDialog(wx.Dialog):
 	) -> None:
 		super().__init__(
 			parent,
-			title="Function and Constant Index",
+			title=_("Function and Constant Index"),
 			style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER,
 			size=(480, 420),
 		)
@@ -52,14 +52,14 @@ class FunctionIndexDialog(wx.Dialog):
 
 		main_sizer = wx.BoxSizer(wx.VERTICAL)
 
-		filter_label = wx.StaticText(self, label="Search")
+		filter_label = wx.StaticText(self, label=_("Search"))
 		self.filter_input = wx.TextCtrl(self)
-		self.filter_input.SetName("Filter functions and constants")
+		self.filter_input.SetName(_("Filter functions and constants"))
 		self.filter_input.Bind(wx.EVT_TEXT, self._on_filter_text)
 		self.filter_input.Bind(wx.EVT_KEY_DOWN, self._on_navigation_key_down)
 
 		self.results_list = wx.ListBox(self, style=wx.LB_SINGLE)
-		self.results_list.SetName("Functions and constants")
+		self.results_list.SetName(_("Functions and constants"))
 		self.results_list.Bind(
 			wx.EVT_LISTBOX_DCLICK,
 			self._on_list_item_activated,

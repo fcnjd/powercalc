@@ -25,7 +25,7 @@ def format_result_for_display(
 def format_error_for_display(error: CalculationError) -> str:
 	"""Return concise user-facing error text."""
 
-	return f"Error: {error.message}"
+	return _("Error: {message}").format(message=error.message)
 
 
 def _strip_decimal_trailing_zeroes(

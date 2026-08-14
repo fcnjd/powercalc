@@ -12,6 +12,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "babel>=2.18.0",
     "pyinstaller>=6.21.0",
     "pytest>=9.1.1",
     "ruff>=0.15.16",
@@ -19,6 +20,9 @@ dev = [
 
 [tool.ruff]
 line-length = 80
+# `_` is installed globally as the gettext translation function
+# (see powercalc/i18n) instead of being imported per module.
+builtins = ["_"]
 
 [tool.ruff.format]
 indent-style = "tab"
