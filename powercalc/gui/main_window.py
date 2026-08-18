@@ -336,6 +336,9 @@ class MainFrame(wx.Frame):
 		panel = wx.Panel(self)
 		main_sizer = wx.BoxSizer(wx.VERTICAL)
 
+		self.info_bar = wx.InfoBar(panel)
+		main_sizer.Add(self.info_bar, wx.SizerFlags(0).Expand())
+
 		expression_label = wx.StaticText(panel, label=_("Expression"))
 		self.expression_input = wx.TextCtrl(
 			panel,
@@ -380,6 +383,19 @@ class MainFrame(wx.Frame):
 
 		panel.SetSizer(main_sizer)
 
+	def _announce(self, message: str) -> None:
+		"""Report a minor, non-interrupting status update.
+
+		Shown both in the status bar and in an ``InfoBar`` banner, since a
+		plain status bar text change is not reliably discovered by screen
+		readers (it is not a keyboard tab stop and is not announced
+		proactively). Focus is left untouched, so this is for confirmations
+		that do not require the user's attention right away.
+		"""
+
+		self.SetStatusText(message)
+		self.info_bar.ShowMessage(message, wx.ICON_INFORMATION)
+
 	def _on_calculate(self, event: wx.Event) -> None:
 		outcome = calculate(
 			self.expression_input.GetValue(),
@@ -416,7 +432,7 @@ class MainFrame(wx.Frame):
 		self.settings = replace(self.settings, **{field: value})
 		self._sync_options_menu()
 		self._save_settings()
-		self.SetStatusText(status)
+		self._announce(status)
 		event.Skip(False)
 
 	def _on_language_choice(
@@ -461,7 +477,7 @@ class MainFrame(wx.Frame):
 		)
 		self._sync_options_menu()
 		self._save_settings()
-		self.SetStatusText(
+		self._announce(
 			_("Decimal precision: {precision}.").format(precision=precision)
 		)
 		event.Skip(False)
@@ -474,7 +490,7 @@ class MainFrame(wx.Frame):
 		self._sync_options_menu()
 		self._save_settings()
 		state = _("on") if self.settings.play_error_sound else _("off")
-		self.SetStatusText(_("Error sound: {state}.").format(state=state))
+		self._announce(_("Error sound: {state}.").format(state=state))
 		event.Skip(False)
 
 	def _on_restore_defaults(self, event: wx.Event) -> None:
@@ -492,7 +508,7 @@ class MainFrame(wx.Frame):
 			self.settings = AppSettings()
 			self._sync_options_menu()
 			self._save_settings()
-			self.SetStatusText(_("Default options restored."))
+			self._announce(_("Default options restored."))
 		event.Skip(False)
 
 	def _save_settings(self) -> None:
@@ -526,24 +542,24 @@ class MainFrame(wx.Frame):
 	def _on_clear_input(self, event: wx.Event) -> None:
 		self.expression_input.Clear()
 		self.expression_input.SetFocus()
-		self.SetStatusText(_("Input cleared."))
+		self._announce(_("Input cleared."))
 		event.Skip(False)
 
 	def _on_copy_result(self, event: wx.Event) -> None:
 		text = self.result_output.GetValue()
 		if not text:
-			self.SetStatusText(_("No result to copy."))
+			self._announce(_("No result to copy."))
 			event.Skip(False)
 			return
 
 		if not wx.TheClipboard.Open():
-			self.SetStatusText(_("Clipboard is not available."))
+			self._announce(_("Clipboard is not available."))
 			event.Skip(False)
 			return
 
 		try:
 			wx.TheClipboard.SetData(wx.TextDataObject(text))
-			self.SetStatusText(_("Result copied."))
+			self._announce(_("Result copied."))
 		finally:
 			wx.TheClipboard.Close()
 		event.Skip(False)
@@ -581,7 +597,7 @@ class MainFrame(wx.Frame):
 				insertion_point + start, insertion_point + end
 			)
 		self.expression_input.SetFocus()
-		self.SetStatusText(
+		self._announce(
 			_("Inserted {name}.").format(name=entry.display_name)
 		)
 
