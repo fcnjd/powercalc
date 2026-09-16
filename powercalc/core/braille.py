@@ -68,7 +68,7 @@ class LiblouisBrailleTranslator:
 		)
 
 		success = self._library.lou_translateString(
-			GERMAN_GRADE_1_TABLE.encode("ascii"),
+			_encode_path(self._table_path),
 			input_buffer,
 			byref(input_length),
 			output_buffer,
@@ -129,7 +129,9 @@ class LiblouisBrailleTranslator:
 				"The bundled Liblouis library reported an unsupported "
 				"character size."
 			)
-		self._library.lou_setDataPath(_encode_path(self._tables_path))
+		self._library.lou_setDataPath(
+			_encode_path(self._runtime_root / "share")
+		)
 		return char_size
 
 

@@ -1,3 +1,4 @@
+import ctypes
 from pathlib import Path
 
 import pytest
@@ -69,10 +70,36 @@ def test_translator_registers_the_bundled_table_directory(tmp_path: Path):
 
 	assert translator._configure_library() == 4
 	assert translator._library.lou_setDataPath.calls == [
-		(str(translator._tables_path).encode("utf-8"),)
+		(str(tmp_path / "share").encode("utf-8"),)
 	]
 
 
 def test_wide_char_encoding_supports_liblouis_character_widths():
 	assert _wide_char_encoding(2).startswith("utf-16-")
 	assert _wide_char_encoding(4).startswith("utf-32-")
+
+
+def test_translator_uses_the_bundled_root_table_path(tmp_path: Path):
+	class TranslateFunction:
+		def __init__(self):
+			self.calls = []
+
+		def __call__(
+			self, table, _input, _input_length, _output, output_length, *_
+		):
+			self.calls.append(table)
+			ctypes.cast(output_length, ctypes.POINTER(ctypes.c_int))[0] = 0
+			return 1
+
+	translator = object.__new__(LiblouisBrailleTranslator)
+	translator._char_size = 2
+	translator._table_path = (
+		tmp_path / "share" / "liblouis" / "tables" / "de-g1.ctb"
+	)
+	translator._library = type("FakeLibrary", (), {})()
+	translator._library.lou_translateString = TranslateFunction()
+
+	assert translator.translate("abc") == ""
+	assert translator._library.lou_translateString.calls == [
+		str(translator._table_path).encode("utf-8")
+	]
