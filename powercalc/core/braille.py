@@ -29,6 +29,9 @@ forward-translation-only.  That is suitable for plot labels; Powercalc does
 not offer Braille back-translation.
 """
 
+UNICODE_DISPLAY_TABLE = "unicode.dis"
+"""Liblouis display table that emits Unicode Braille code points."""
+
 
 class BrailleTranslationUnavailable(RuntimeError):
 	"""Raised when the packaged Liblouis runtime cannot be used."""
@@ -51,6 +54,7 @@ class LiblouisBrailleTranslator:
 		self._library_path = self._runtime_root / "liblouis.dll"
 		self._tables_path = self._runtime_root / "share" / "liblouis" / "tables"
 		self._table_path = self._tables_path / GERMAN_GRADE_1_TABLE
+		self._unicode_display_path = self._tables_path / UNICODE_DISPLAY_TABLE
 		self._library = self._load_library()
 		self._char_size = self._configure_library()
 
@@ -76,7 +80,7 @@ class LiblouisBrailleTranslator:
 		)
 
 		success = self._library.lou_translateString(
-			_encode_path(self._table_path),
+			_encode_table_list(self._unicode_display_path, self._table_path),
 			input_buffer,
 			byref(input_length),
 			output_buffer,
@@ -102,6 +106,10 @@ class LiblouisBrailleTranslator:
 		if not self._table_path.is_file():
 			raise BrailleTranslationUnavailable(
 				"The bundled German Braille table is unavailable."
+			)
+		if not self._unicode_display_path.is_file():
+			raise BrailleTranslationUnavailable(
+				"The bundled Unicode Braille display table is unavailable."
 			)
 		try:
 			loader = (
@@ -145,6 +153,12 @@ def _encode_path(path: Path) -> bytes:
 		"mbcs" if sys.platform == "win32" else sys.getfilesystemencoding()
 	)
 	return str(path).encode(encoding)
+
+
+def _encode_table_list(*paths: Path) -> bytes:
+	"""Encode a Liblouis table list using bundled absolute paths."""
+
+	return b",".join(_encode_path(path) for path in paths)
 
 
 def _wide_char_encoding(char_size: int) -> str:

@@ -75,7 +75,7 @@ def test_wide_char_encoding_supports_liblouis_character_widths():
 	assert _wide_char_encoding(4).startswith("utf-32-")
 
 
-def test_translator_uses_the_bundled_root_table_path(tmp_path: Path):
+def test_translator_uses_bundled_unicode_and_root_table_paths(tmp_path: Path):
 	class TranslateFunction:
 		def __init__(self):
 			self.calls = []
@@ -92,10 +92,18 @@ def test_translator_uses_the_bundled_root_table_path(tmp_path: Path):
 	translator._table_path = (
 		tmp_path / "share" / "liblouis" / "tables" / "de-g1.ctb"
 	)
+	translator._unicode_display_path = (
+		tmp_path / "share" / "liblouis" / "tables" / "unicode.dis"
+	)
 	translator._library = type("FakeLibrary", (), {})()
 	translator._library.lou_translateString = TranslateFunction()
 
 	assert translator.translate("abc") == ""
 	assert translator._library.lou_translateString.calls == [
-		str(translator._table_path).encode("utf-8")
+		b",".join(
+			(
+				str(translator._unicode_display_path).encode("utf-8"),
+				str(translator._table_path).encode("utf-8"),
+			)
+		)
 	]

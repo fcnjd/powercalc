@@ -24,6 +24,7 @@ def _write_release_archive(archive_path: Path) -> None:
 		)
 		archive.writestr("share/liblouis/tables/de-g1-core.cti", "")
 		archive.writestr("share/liblouis/tables/de-chardefs6.cti", "")
+		archive.writestr("share/liblouis/tables/unicode.dis", "")
 
 
 def test_prepare_windows_runtime_extracts_dll_and_transitive_tables(
@@ -43,6 +44,7 @@ def test_prepare_windows_runtime_extracts_dll_and_transitive_tables(
 	assert (table_root / "de-g0.utb").exists()
 	assert (table_root / "de-g1-core.cti").exists()
 	assert (table_root / "de-chardefs6.cti").exists()
+	assert (table_root / "unicode.dis").exists()
 
 
 def test_prepare_windows_runtime_rejects_missing_included_table(tmp_path: Path):

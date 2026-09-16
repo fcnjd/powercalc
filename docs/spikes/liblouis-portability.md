@@ -17,9 +17,10 @@ portable distribution without relying on an unofficial PyPI package?
   back-translation.
 
 The build downloads the pinned official archive, verifies its SHA-256, and
-extracts `liblouis.dll` plus the table and every transitive `include` needed by
-that table. No third-party package named `louis`, `Pylouis`, or similar is
-used.
+extracts `liblouis.dll`, `unicode.dis`, the German table, and every transitive
+`include` needed by that table. `unicode.dis` is first in the runtime table
+list so Liblouis emits Unicode Braille rather than a device display encoding.
+No third-party package named `louis`, `Pylouis`, or similar is used.
 
 ## Runtime boundary
 

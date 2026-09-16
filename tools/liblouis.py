@@ -19,6 +19,7 @@ WINDOWS_X64_SHA256 = (
 RUNTIME_LIBRARY_MEMBER = "bin/liblouis.dll"
 TABLE_ROOT = "share/liblouis/tables"
 GERMAN_GRADE_1_TABLE = "de-g1.ctb"
+UNICODE_DISPLAY_TABLE = "unicode.dis"
 
 
 class LiblouisBuildError(RuntimeError):
@@ -60,7 +61,9 @@ def prepare_windows_x64_runtime(
 		_extract_member(
 			archive, RUNTIME_LIBRARY_MEMBER, destination / "liblouis.dll"
 		)
-		for table_name in _required_tables(archive, GERMAN_GRADE_1_TABLE):
+		for table_name in _required_tables(
+			archive, GERMAN_GRADE_1_TABLE, UNICODE_DISPLAY_TABLE
+		):
 			_extract_member(
 				archive,
 				f"{TABLE_ROOT}/{table_name}",
@@ -69,11 +72,11 @@ def prepare_windows_x64_runtime(
 	return destination
 
 
-def _required_tables(archive: ZipFile, root_table: str) -> list[str]:
-	"""Return a stable, include-complete table list rooted at ``root_table``."""
+def _required_tables(archive: ZipFile, *root_tables: str) -> list[str]:
+	"""Return an include-complete table list rooted at ``root_tables``."""
 
 	seen: set[str] = set()
-	pending = [root_table]
+	pending = list(root_tables)
 	while pending:
 		table_name = pending.pop()
 		if table_name in seen:
