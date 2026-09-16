@@ -50,6 +50,7 @@ Current runtime dependencies:
 - `sympy` — mathematical and symbolic engine
 - `platformdirs` — platform-specific locations for settings, history, and
   later user data
+- `matplotlib` — headless SVG export for high-contrast tactile function plots
 
 Current development dependencies:
 
@@ -70,12 +71,14 @@ powercalc/
 		__init__.py
 		calculator.py
 		catalog.py
+		tactile_plot.py
 	gui/
 		__init__.py
 		app.py
 		formatting.py
 		index_dialog.py
 		main_window.py
+		tactile_plot_dialog.py
 	i18n/
 		__init__.py
 	locale/
@@ -93,6 +96,7 @@ installer/
 tests/
 	test_core_calculator.py
 	test_core_catalog.py
+	test_core_tactile_plot.py
 	test_gui_formatting.py
 	test_gui_import.py
 	test_gui_index_dialog.py
@@ -121,6 +125,11 @@ main.py
 
 The GUI must access the calculation core only through clear public functions
 and data types. The core must not depend on wxPython.
+
+Tactile plots are exported from a native dialog as SVG. Their plotting parser
+uses the same restricted AST conversion as ordinary calculator input, with
+only the independent variable `x` additionally allowed. Keep the exporter
+headless and keep a text-based error path for every failed export.
 
 ## Current GUI Behavior
 

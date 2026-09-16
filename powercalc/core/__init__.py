@@ -8,6 +8,7 @@ from powercalc.core.calculator import (
 	DecimalSeparator,
 	EvaluationOptions,
 	calculate,
+	parse_function_expression,
 )
 from powercalc.core.catalog import (
 	CatalogEntry,
@@ -26,4 +27,5 @@ __all__ = [
 	"FUNCTION_CATALOG",
 	"build_insertion",
 	"calculate",
+	"parse_function_expression",
 ]

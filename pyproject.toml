@@ -5,7 +5,8 @@ description = "Accessible professional desktop calculator"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "platformdirs>=4.10.0",
+	"matplotlib>=3.10.0",
+	"platformdirs>=4.10.0",
     "sympy>=1.14.0",
     "wxpython>=4.2.5",
 ]

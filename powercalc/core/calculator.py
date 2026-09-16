@@ -241,6 +241,39 @@ def calculate(
 		)
 
 
+def parse_function_expression(
+	expression: str,
+	options: EvaluationOptions | None = None,
+) -> tuple[sp.Symbol, sp.Expr]:
+	"""Safely parse an expression containing the independent variable ``x``.
+
+	This is deliberately separate from :func:`calculate`: ordinary calculator
+	input must continue to reject unknown names, while plotting needs one
+	explicitly allowed variable. The returned SymPy expression was built through
+	the same restricted AST conversion as calculator input and never through
+	``eval`` or a SymPy string parser.
+
+	Raises:
+		ExpressionError: If the source is invalid or uses a name other than
+			``x``.
+	"""
+
+	options = options or EvaluationOptions()
+	_validate_options(options)
+	canonical_normalized = _normalize_expression(expression, options)
+	parsed = ast.parse(canonical_normalized, mode="eval")
+	_check_ast_limits(parsed)
+	variable = sp.Symbol("x", real=True)
+	context = _EvaluationContext(options, variables={"x": variable})
+	value = sp.simplify(context.convert(parsed.body))
+	if value.has(sp.zoo, sp.nan):
+		raise ExpressionError(
+			CalculationErrorCode.UNDEFINED_RESULT,
+			"Expression result is undefined.",
+		)
+	return variable, value
+
+
 def _validate_options(options: EvaluationOptions) -> None:
 	if options.decimal_precision < 1:
 		raise ExpressionError(
@@ -473,8 +506,14 @@ def _validate_result(value: sp.Expr, options: EvaluationOptions) -> None:
 
 
 class _EvaluationContext:
-	def __init__(self, options: EvaluationOptions) -> None:
+	def __init__(
+		self,
+		options: EvaluationOptions,
+		*,
+		variables: dict[str, sp.Expr] | None = None,
+	) -> None:
 		self.options = options
+		self.variables = variables or {}
 		self.constants: dict[str, sp.Expr] = {
 			"pi": sp.pi,
 			"e": sp.E,
@@ -562,6 +601,8 @@ class _EvaluationContext:
 		return self._call_function(function_name, args, node)
 
 	def _convert_name(self, node: ast.Name) -> sp.Expr:
+		if node.id in self.variables:
+			return self.variables[node.id]
 		try:
 			return self.constants[node.id]
 		except KeyError as exc:
