@@ -64,13 +64,12 @@ def test_translator_registers_the_bundled_table_directory(tmp_path: Path):
 	translator = object.__new__(LiblouisBrailleTranslator)
 	translator._library = FakeLibrary()
 	translator._runtime_root = tmp_path
-	translator._table_path = (
-		tmp_path / "share" / "liblouis" / "tables" / "de-g1.ctb"
-	)
+	translator._tables_path = tmp_path / "share" / "liblouis" / "tables"
+	translator._table_path = translator._tables_path / "de-g1.ctb"
 
 	assert translator._configure_library() == 4
 	assert translator._library.lou_setDataPath.calls == [
-		(str(tmp_path / "share").encode("utf-8"),)
+		(str(translator._tables_path).encode("utf-8"),)
 	]
 
 

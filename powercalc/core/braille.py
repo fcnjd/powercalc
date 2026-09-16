@@ -41,13 +41,8 @@ class LiblouisBrailleTranslator:
 	def __init__(self, runtime_root: Path | None = None) -> None:
 		self._runtime_root = runtime_root or bundled_liblouis_root()
 		self._library_path = self._runtime_root / "liblouis.dll"
-		self._table_path = (
-			self._runtime_root
-			/ "share"
-			/ "liblouis"
-			/ "tables"
-			/ GERMAN_GRADE_1_TABLE
-		)
+		self._tables_path = self._runtime_root / "share" / "liblouis" / "tables"
+		self._table_path = self._tables_path / GERMAN_GRADE_1_TABLE
 		self._library = self._load_library()
 		self._char_size = self._configure_library()
 
@@ -134,9 +129,7 @@ class LiblouisBrailleTranslator:
 				"The bundled Liblouis library reported an unsupported "
 				"character size."
 			)
-		self._library.lou_setDataPath(
-			_encode_path(self._runtime_root / "share")
-		)
+		self._library.lou_setDataPath(_encode_path(self._tables_path))
 		return char_size
 
 
