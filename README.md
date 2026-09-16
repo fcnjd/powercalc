@@ -47,6 +47,16 @@ Changes apply to the next calculation and are saved immediately.
 Point mode uses commas between function arguments. Comma mode uses decimal
 commas and semicolons between function arguments, for example `log(8; 2)`.
 
+## Tactile function plots
+
+Use **File > Export Tactile Plot** (`Ctrl+Shift+P`) to export a real-valued
+function of `x` as SVG. The exporter uses the same restricted parser as the
+calculator, so only the calculator's allowed functions and the one variable
+`x` are accepted. The SVG has thick black lines, periodic markers, prominent
+axes, and a dotted reference grid for transfer to swell paper or embossers.
+The optional Braille-label setting uses a deliberately limited uncontracted
+mapping; review labels before production embossing.
+
 ## Development
 
 Common commands:
