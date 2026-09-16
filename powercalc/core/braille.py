@@ -10,7 +10,15 @@ from __future__ import annotations
 
 import ctypes
 import sys
-from ctypes import byref, c_char_p, c_int, c_void_p, create_string_buffer
+from ctypes import (
+	POINTER,
+	byref,
+	c_char,
+	c_char_p,
+	c_int,
+	c_ushort,
+	create_string_buffer,
+)
 from pathlib import Path
 
 GERMAN_GRADE_1_TABLE = "de-g1.ctb"
@@ -110,17 +118,15 @@ class LiblouisBrailleTranslator:
 	def _configure_library(self) -> int:
 		self._library.lou_charSize.restype = c_int
 		self._library.lou_charSize.argtypes = ()
-		self._library.lou_setDataPath.restype = c_char_p
-		self._library.lou_setDataPath.argtypes = (c_char_p,)
 		self._library.lou_translateString.restype = c_int
 		self._library.lou_translateString.argtypes = (
 			c_char_p,
-			c_void_p,
-			c_void_p,
-			c_void_p,
-			c_void_p,
-			c_void_p,
-			c_void_p,
+			POINTER(c_char),
+			POINTER(c_int),
+			POINTER(c_char),
+			POINTER(c_int),
+			POINTER(c_ushort),
+			POINTER(c_char),
 			c_int,
 		)
 		char_size = self._library.lou_charSize()
@@ -129,9 +135,6 @@ class LiblouisBrailleTranslator:
 				"The bundled Liblouis library reported an unsupported "
 				"character size."
 			)
-		self._library.lou_setDataPath(
-			_encode_path(self._runtime_root / "share")
-		)
 		return char_size
 
 

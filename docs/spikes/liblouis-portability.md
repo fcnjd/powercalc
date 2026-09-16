@@ -24,9 +24,9 @@ used.
 ## Runtime boundary
 
 `powercalc.core.braille.LiblouisBrailleTranslator` is a narrow `ctypes`
-adapter. It loads only the bundled DLL, explicitly sets Liblouis' data path to
-the bundled `share` directory in Liblouis' expected data layout, and selects
-the documented table by name.
+adapter. It loads only the bundled DLL and passes the bundled root table by
+absolute path, so Liblouis resolves its included tables relative to that file.
+It does not mutate Liblouis' deprecated global data path.
 Missing DLLs, tables, or load failures become a readable unavailable state;
 the future tactile-plot dialog must keep Braille labels disabled in that state.
 

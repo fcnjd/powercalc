@@ -47,7 +47,7 @@ def test_smoke_finds_pyinstaller_internal_data_directory(tmp_path: Path):
 	assert find_runtime_root(tmp_path) == runtime_root
 
 
-def test_translator_registers_the_bundled_table_directory(tmp_path: Path):
+def test_translator_accepts_supported_liblouis_character_width(tmp_path: Path):
 	class FakeFunction:
 		def __init__(self, result=None):
 			self.result = result
@@ -59,7 +59,6 @@ def test_translator_registers_the_bundled_table_directory(tmp_path: Path):
 
 	class FakeLibrary:
 		lou_charSize = FakeFunction(4)
-		lou_setDataPath = FakeFunction()
 		lou_translateString = FakeFunction(1)
 
 	translator = object.__new__(LiblouisBrailleTranslator)
@@ -69,9 +68,6 @@ def test_translator_registers_the_bundled_table_directory(tmp_path: Path):
 	translator._table_path = translator._tables_path / "de-g1.ctb"
 
 	assert translator._configure_library() == 4
-	assert translator._library.lou_setDataPath.calls == [
-		(str(tmp_path / "share").encode("utf-8"),)
-	]
 
 
 def test_wide_char_encoding_supports_liblouis_character_widths():
