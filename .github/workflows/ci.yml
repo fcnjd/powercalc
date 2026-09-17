@@ -49,3 +49,33 @@ jobs:
           "import powercalc; import powercalc.gui;
           from powercalc.version import get_version;
           print(f'Powercalc {get_version()} import smoke check passed.')"
+
+  windows-liblouis-smoke:
+    name: Windows Liblouis portable smoke check
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v8.1.0
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Build Windows portable artifact
+        run: uv run --frozen python -m tools.build portable
+
+      - name: Smoke-test bundled Liblouis runtime
+        run: >
+          uv run --frozen python -m tools.braille_smoke
+          dist/Powercalc
+
+      - name: Upload portable artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: powercalc-windows-liblouis-spike
+          path: dist/release/*-portable.zip

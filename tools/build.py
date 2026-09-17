@@ -9,19 +9,21 @@ from __future__ import annotations
 import argparse
 import hashlib
 import os
-from pathlib import Path
 import platform
 import shutil
 import subprocess
 import sys
 import tomllib
 import zipfile
+from pathlib import Path
 
-from powercalc.version import get_version
 from powercalc.settings import PORTABLE_MARKER_NAME
-
+from powercalc.version import get_version
 from tools.i18n import compile_catalogs
-
+from tools.liblouis import (
+	download_windows_x64_release,
+	prepare_windows_x64_runtime,
+)
 
 APP_NAME = "Powercalc"
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -95,6 +97,15 @@ def build_pyinstaller_bundle() -> Path:
 
 	bundle_path = get_bundle_path()
 	remove_path(bundle_path)
+	additional_data = [
+		("--add-data", f"{ICON_PATH}{os.pathsep}assets"),
+		("--add-data", f"{LOCALE_PATH}{os.pathsep}locale"),
+	]
+	if current_platform_tag() == "windows-x64":
+		runtime_path = prepare_liblouis_runtime()
+		additional_data.append(
+			("--add-data", f"{runtime_path}{os.pathsep}resources/liblouis")
+		)
 
 	command = [
 		sys.executable,
@@ -107,10 +118,6 @@ def build_pyinstaller_bundle() -> Path:
 		APP_NAME,
 		"--icon",
 		str(ICON_PATH),
-		"--add-data",
-		f"{ICON_PATH}{os.pathsep}assets",
-		"--add-data",
-		f"{LOCALE_PATH}{os.pathsep}locale",
 		"--exclude-module",
 		"pytest",
 		"--exclude-module",
@@ -125,10 +132,23 @@ def build_pyinstaller_bundle() -> Path:
 		str(BUILD_ROOT / "pyinstaller"),
 		str(PROJECT_ROOT / "main.py"),
 	]
+	for option, value in reversed(additional_data):
+		command[10:10] = [option, value]
 	run(command)
 	if not bundle_path.exists():
 		raise BuildError(f"PyInstaller did not create {bundle_path}")
 	return bundle_path
+
+
+def prepare_liblouis_runtime() -> Path:
+	"""Download and stage the verified Liblouis runtime for Windows."""
+
+	download_path = BUILD_ROOT / "downloads" / "liblouis-win64.zip"
+	archive_path = download_windows_x64_release(download_path)
+	return prepare_windows_x64_runtime(
+		archive_path,
+		BUILD_ROOT / "resources" / "liblouis",
+	)
 
 
 def build_portable_zip() -> Path:

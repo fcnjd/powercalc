@@ -57,6 +57,13 @@ Current development dependencies:
 - `ruff` — linting and formatting
 - `pytest` — automated tests
 
+Optional packaged runtime under review:
+
+- `Liblouis 3.39.0` — official Windows x64 DLL and German Grade 1 tables for
+  reliable tactile-plot Braille labels. It is not a PyPI dependency: the
+  Windows build downloads a SHA-256-pinned official archive. See
+  `docs/spikes/liblouis-portability.md`.
+
 Package/project manager:
 
 - `uv`
@@ -121,6 +128,11 @@ main.py
 
 The GUI must access the calculation core only through clear public functions
 and data types. The core must not depend on wxPython.
+
+When the Liblouis spike is enabled, its narrow `ctypes` adapter lives in
+`core/braille.py`; packaging and verified table extraction live in
+`tools/liblouis.py`. Do not substitute a similarly named PyPI package for the
+official runtime.
 
 ## Current GUI Behavior
 
