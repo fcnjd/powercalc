@@ -22,6 +22,17 @@ extracts `liblouis.dll`, `unicode.dis`, the German table, and every transitive
 list so Liblouis emits Unicode Braille rather than a device display encoding.
 No third-party package named `louis`, `Pylouis`, or similar is used.
 
+## License and attribution
+
+The official Windows runtime archive does not include a license file. The build
+therefore downloads `COPYING.LESSER` from the same pinned Liblouis `3.39.0`
+tag, verifies its SHA-256, and bundles it as
+`licenses/LGPL-2.1-or-later.txt`. It also generates `THIRD_PARTY_NOTICES.md`
+beside the DLL. The notice identifies the source URLs, both checksums, the
+LGPL-2.1-or-later license, and every bundled transitive table. The Windows
+smoke test fails unless both notice files are present in the final portable
+bundle.
+
 ## Runtime boundary
 
 `powercalc.core.braille.LiblouisBrailleTranslator` is a narrow `ctypes`

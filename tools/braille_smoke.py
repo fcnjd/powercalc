@@ -27,6 +27,14 @@ def main() -> int:
 	args = parser.parse_args()
 
 	runtime_root = find_runtime_root(args.bundle_root)
+	license = runtime_root / "licenses" / "LGPL-2.1-or-later.txt"
+	notice = runtime_root / "THIRD_PARTY_NOTICES.md"
+	if not license.is_file() or not notice.is_file():
+		raise RuntimeError(
+			"The Powercalc bundle lacks Liblouis license notices."
+		)
+	if "Liblouis" not in notice.read_text(encoding="utf-8"):
+		raise RuntimeError("The bundled Liblouis attribution is incomplete.")
 	translation = LiblouisBrailleTranslator(runtime_root).translate("abc")
 	if translation != "⠁⠃⠉":
 		raise RuntimeError(

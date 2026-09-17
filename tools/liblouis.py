@@ -16,6 +16,13 @@ WINDOWS_X64_URL = (
 WINDOWS_X64_SHA256 = (
 	"64d669ac30f1411e0023b1cecc81c7a7b5374678ee41302c95ac8c7c8fbc6591"
 )
+LICENSE_URL = (
+	"https://raw.githubusercontent.com/liblouis/liblouis/"
+	f"v{LIBLOUIS_VERSION}/COPYING.LESSER"
+)
+LICENSE_SHA256 = (
+	"dc626520dcd53a22f727af3ee42c770e56c97a64fe3adb063799d8ab032fe551"
+)
 RUNTIME_LIBRARY_MEMBER = "bin/liblouis.dll"
 TABLE_ROOT = "share/liblouis/tables"
 GERMAN_GRADE_1_TABLE = "de-g1.ctb"
@@ -57,19 +64,34 @@ def prepare_windows_x64_runtime(
 		shutil.rmtree(destination)
 	destination.mkdir(parents=True)
 
+	license_path = destination / "licenses" / "LGPL-2.1-or-later.txt"
+	download_pinned_license(license_path)
+
 	with ZipFile(archive_path) as archive:
 		_extract_member(
 			archive, RUNTIME_LIBRARY_MEMBER, destination / "liblouis.dll"
 		)
-		for table_name in _required_tables(
+		table_names = _required_tables(
 			archive, GERMAN_GRADE_1_TABLE, UNICODE_DISPLAY_TABLE
-		):
+		)
+		for table_name in table_names:
 			_extract_member(
 				archive,
 				f"{TABLE_ROOT}/{table_name}",
 				destination / "share" / "liblouis" / "tables" / table_name,
 			)
+	_write_third_party_notice(destination, table_names)
 	return destination
+
+
+def download_pinned_license(license_path: Path) -> Path:
+	"""Fetch Liblouis' LGPL text from the pinned release tag and verify it."""
+
+	license_path.parent.mkdir(parents=True, exist_ok=True)
+	if not license_path.exists():
+		urlretrieve(LICENSE_URL, license_path)
+	verify_sha256(license_path, LICENSE_SHA256)
+	return license_path
 
 
 def _required_tables(archive: ZipFile, *root_tables: str) -> list[str]:
@@ -106,6 +128,29 @@ def _extract_member(archive: ZipFile, member: str, destination: Path) -> None:
 		) from exc
 	destination.parent.mkdir(parents=True, exist_ok=True)
 	destination.write_bytes(content)
+
+
+def _write_third_party_notice(
+	destination: Path, table_names: list[str]
+) -> None:
+	"""Write the attribution that ships alongside the bundled runtime."""
+
+	table_list = "\n".join(f"- `{table_name}`" for table_name in table_names)
+	(destination / "THIRD_PARTY_NOTICES.md").write_text(
+		"# Third-party notices\n\n"
+		"## Liblouis\n\n"
+		f"Powercalc bundles Liblouis {LIBLOUIS_VERSION} for German Grade 1 "
+		"Braille translation on Windows.\n\n"
+		f"- Runtime source: {WINDOWS_X64_URL}\n"
+		f"- Runtime SHA-256: `{WINDOWS_X64_SHA256}`\n"
+		f"- License text source: {LICENSE_URL}\n"
+		f"- License text SHA-256: `{LICENSE_SHA256}`\n"
+		"- License: GNU Lesser General Public License, version 2.1 or later; "
+		"see `licenses/LGPL-2.1-or-later.txt`.\n\n"
+		"Bundled Liblouis translation tables:\n"
+		f"{table_list}\n",
+		encoding="utf-8",
+	)
 
 
 def _validate_table_name(table_name: str) -> None:
