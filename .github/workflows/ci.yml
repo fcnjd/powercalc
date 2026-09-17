@@ -50,8 +50,8 @@ jobs:
           from powercalc.version import get_version;
           print(f'Powercalc {get_version()} import smoke check passed.')"
 
-  windows-liblouis-smoke:
-    name: Windows Liblouis portable smoke check
+  windows-tactile-plot-smoke:
+    name: Windows tactile plot portable smoke check
     runs-on: windows-latest
 
     steps:
@@ -69,7 +69,7 @@ jobs:
       - name: Build Windows portable artifact
         run: uv run --frozen python -m tools.build portable
 
-      - name: Smoke-test bundled Liblouis runtime
+      - name: Smoke-test bundled Liblouis runtime and tactile exports
         run: >
           uv run --frozen python -m tools.braille_smoke
           dist/Powercalc

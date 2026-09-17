@@ -46,6 +46,7 @@ Python version according to `pyproject.toml`:
 
 Current runtime dependencies:
 
+- `matplotlib` — headless SVG/PNG rendering for tactile function plots
 - `wxPython` — native desktop GUI
 - `sympy` — mathematical and symbolic engine
 - `platformdirs` — platform-specific locations for settings, history, and
@@ -75,14 +76,17 @@ powercalc/
 	settings.py
 	core/
 		__init__.py
+		braille.py
 		calculator.py
 		catalog.py
+		tactile_plot.py
 	gui/
 		__init__.py
 		app.py
 		formatting.py
 		index_dialog.py
 		main_window.py
+		tactile_plot_dialog.py
 	i18n/
 		__init__.py
 	locale/
