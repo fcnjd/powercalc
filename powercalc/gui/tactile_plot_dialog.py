@@ -12,7 +12,6 @@ from powercalc.core.tactile_plot import (
 	braille_labels_available,
 )
 
-
 _PROFILE_CHOICES = (
 	(_("Swell paper"), ContentProfile.SWELL_PAPER),
 	(_("Embosser"), ContentProfile.EMBOSSER),
