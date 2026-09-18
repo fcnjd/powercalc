@@ -4,8 +4,15 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 from powercalc.core.braille import LiblouisBrailleTranslator
+from powercalc.core.tactile_plot import (
+	ContentProfile,
+	PlotFileFormat,
+	TactilePlotRequest,
+	export_tactile_plot,
+)
 
 
 def find_runtime_root(bundle_root: Path) -> Path:
@@ -40,7 +47,35 @@ def main() -> int:
 		raise RuntimeError(
 			f"Unexpected German Grade 1 translation for 'abc': {translation!r}."
 		)
-	print("Liblouis Windows runtime smoke check passed.")
+	translator = LiblouisBrailleTranslator(runtime_root)
+	with TemporaryDirectory() as temporary_directory:
+		temporary_path = Path(temporary_directory)
+		svg_path = export_tactile_plot(
+			TactilePlotRequest(
+				"x^2",
+				content_profile=ContentProfile.SWELL_PAPER,
+				use_braille_labels=True,
+			),
+			temporary_path / "tactile-plot",
+			braille_translator=translator,
+		)
+		png_path = export_tactile_plot(
+			TactilePlotRequest(
+				"x^2",
+				content_profile=ContentProfile.EMBOSSER,
+				file_format=PlotFileFormat.PNG,
+			),
+			temporary_path / "tactile-plot",
+		)
+		if "<svg" not in svg_path.read_text(encoding="utf-8"):
+			raise RuntimeError(
+				"The bundled runtime did not export a valid SVG."
+			)
+		if png_path.read_bytes()[:8] != b"\x89PNG\r\n\x1a\n":
+			raise RuntimeError(
+				"The bundled runtime did not export a valid PNG."
+			)
+	print("Liblouis and tactile-plot Windows smoke check passed.")
 	return 0
 
 

@@ -10,7 +10,6 @@ from typing import Literal
 
 import sympy as sp
 
-
 AngleUnit = Literal["radian", "degree", "gradian"]
 DecimalSeparator = Literal["point", "comma"]
 LogMode = Literal["calculator", "natural"]
@@ -239,6 +238,34 @@ def calculate(
 				f"Invalid expression: {exc}",
 			)
 		)
+
+
+def parse_function_expression(
+	expression: str,
+	options: EvaluationOptions | None = None,
+) -> tuple[sp.Symbol, sp.Expr]:
+	"""Safely parse an expression containing the independent variable ``x``.
+
+	This deliberately uses the calculator's restricted AST conversion rather
+	than Python ``eval`` or a SymPy string parser. Ordinary calculator input
+	continues to reject unknown names; this plotting-specific boundary permits
+	only the explicit real-valued variable ``x``.
+	"""
+
+	options = options or EvaluationOptions()
+	_validate_options(options)
+	canonical_normalized = _normalize_expression(expression, options)
+	parsed = ast.parse(canonical_normalized, mode="eval")
+	_check_ast_limits(parsed)
+	variable = sp.Symbol("x", real=True)
+	context = _EvaluationContext(options, variables={"x": variable})
+	value = sp.simplify(context.convert(parsed.body))
+	if value.has(sp.zoo, sp.nan):
+		raise ExpressionError(
+			CalculationErrorCode.UNDEFINED_RESULT,
+			"Expression result is undefined.",
+		)
+	return variable, value
 
 
 def _validate_options(options: EvaluationOptions) -> None:
@@ -473,7 +500,11 @@ def _validate_result(value: sp.Expr, options: EvaluationOptions) -> None:
 
 
 class _EvaluationContext:
-	def __init__(self, options: EvaluationOptions) -> None:
+	def __init__(
+		self,
+		options: EvaluationOptions,
+		variables: dict[str, sp.Expr] | None = None,
+	) -> None:
 		self.options = options
 		self.constants: dict[str, sp.Expr] = {
 			"pi": sp.pi,
@@ -483,6 +514,8 @@ class _EvaluationContext:
 			"i": sp.I,
 			"I": sp.I,
 		}
+		if variables:
+			self.constants.update(variables)
 
 	def convert(self, node: ast.AST) -> sp.Expr:
 		match node:

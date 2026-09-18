@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import replace
 from functools import partial
+from pathlib import Path
 
 import wx
 
@@ -14,12 +15,19 @@ from powercalc.core import (
 	build_insertion,
 	calculate,
 )
+from powercalc.core.tactile_plot import (
+	PlotFileFormat,
+	TactilePlotError,
+	export_tactile_plot,
+	validate_tactile_plot_request,
+)
 from powercalc.gui.formatting import (
 	format_error_for_display,
 	format_result_for_display,
 )
 from powercalc.gui.index_dialog import FunctionIndexDialog
 from powercalc.gui.resources import get_app_icon_path
+from powercalc.gui.tactile_plot_dialog import TactilePlotDialog
 from powercalc.settings import AppSettings, SettingsSaveError, SettingsStore
 from powercalc.version import get_version, get_versioned_title
 
@@ -30,6 +38,7 @@ ID_DECIMAL_PRECISION = wx.NewIdRef()
 ID_ERROR_SOUND = wx.NewIdRef()
 ID_FUNCTION_INDEX = wx.NewIdRef()
 ID_RESTORE_DEFAULTS = wx.NewIdRef()
+ID_EXPORT_TACTILE_PLOT = wx.NewIdRef()
 
 KEYBOARD_HELP = _("""Keyboard commands:
 
@@ -138,12 +147,23 @@ class MainFrame(wx.Frame):
 		menu_bar = wx.MenuBar()
 
 		file_menu = wx.Menu()
+		tactile_plot_item = file_menu.Append(
+			ID_EXPORT_TACTILE_PLOT,
+			_("Export &Tactile Plot…\tCtrl+Shift+P"),
+			_("Export a tactile function plot"),
+		)
+		file_menu.AppendSeparator()
 		exit_item = file_menu.Append(
 			wx.ID_EXIT,
 			_("E&xit"),
 			_("Exit Powercalc"),
 		)
 		self.Bind(wx.EVT_MENU, self._on_exit, exit_item)
+		self.Bind(
+			wx.EVT_MENU,
+			self._on_export_tactile_plot,
+			tactile_plot_item,
+		)
 		menu_bar.Append(file_menu, _("&File"))
 
 		edit_menu = wx.Menu()
@@ -567,6 +587,74 @@ class MainFrame(wx.Frame):
 			return
 		self._insert_catalog_entry(entry)
 		event.Skip(False)
+
+	def _on_export_tactile_plot(self, event: wx.Event) -> None:
+		dialog = TactilePlotDialog(self, self.expression_input.GetValue())
+		try:
+			if dialog.ShowModal() != wx.ID_SAVE:
+				event.Skip(False)
+				return
+			request = dialog.get_request()
+			validate_tactile_plot_request(
+				request,
+				self.settings.evaluation_options(),
+			)
+		except ValueError as exc:
+			self._show_tactile_plot_error(str(exc))
+			event.Skip(False)
+			return
+		finally:
+			dialog.Destroy()
+
+		wildcard = (
+			_("SVG files (*.svg)|*.svg")
+			if request.file_format is PlotFileFormat.SVG
+			else _("PNG files (*.png)|*.png")
+		)
+		extension = request.file_format.value
+		save_dialog = wx.FileDialog(
+			self,
+			message=_("Save tactile plot"),
+			wildcard=wildcard,
+			defaultFile=f"tactile-plot.{extension}",
+			style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT,
+		)
+		try:
+			if save_dialog.ShowModal() != wx.ID_OK:
+				event.Skip(False)
+				return
+			path = save_dialog.GetPath()
+		finally:
+			save_dialog.Destroy()
+
+		try:
+			exported_path = export_tactile_plot(
+				request,
+				Path(path),
+				self.settings.evaluation_options(),
+			)
+		except TactilePlotError as exc:
+			self._show_tactile_plot_error(str(exc))
+		else:
+			self.SetStatusText(
+				_("Tactile {format} exported: {name}").format(
+					format=request.file_format.upper(),
+					name=exported_path.name,
+				)
+			)
+		event.Skip(False)
+
+	def _show_tactile_plot_error(self, message: str) -> None:
+		dialog = wx.MessageDialog(
+			self,
+			message,
+			_("Tactile plot export"),
+			wx.OK | wx.ICON_ERROR,
+		)
+		try:
+			dialog.ShowModal()
+		finally:
+			dialog.Destroy()
 
 	def _insert_catalog_entry(self, entry: CatalogEntry) -> None:
 		text, start, end = build_insertion(
