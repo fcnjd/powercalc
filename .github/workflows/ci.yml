@@ -29,7 +29,8 @@ jobs:
             libcairo2-dev \
             libgdk-pixbuf-2.0-dev \
             libatk1.0-dev \
-            libxtst-dev
+            libxtst-dev \
+            xvfb
 
       - name: Install dependencies
         run: uv sync --frozen
@@ -41,7 +42,7 @@ jobs:
         run: uv run --frozen ruff format --check .
 
       - name: Run pytest
-        run: uv run --frozen pytest
+        run: xvfb-run -a uv run --frozen pytest
 
       - name: Run import smoke check
         run: >
