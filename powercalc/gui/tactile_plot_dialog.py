@@ -111,7 +111,7 @@ class TactilePlotDialog(wx.Dialog):
 		button_sizer.AddStretchSpacer()
 		button_sizer.Add(
 			self.save_button,
-			wx.SizerFlags(0).Right().Border(wx.RIGHT, 8),
+			wx.SizerFlags(0).Border(wx.RIGHT, 8),
 		)
 		button_sizer.Add(cancel_button)
 		main_sizer.Add(
