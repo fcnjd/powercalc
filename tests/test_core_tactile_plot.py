@@ -127,3 +127,51 @@ def test_invalid_or_unsafe_requests_fail_without_output(
 	with pytest.raises(TactilePlotError):
 		export_tactile_plot(plot_request, tmp_path / "plot")
 	assert not list(tmp_path.iterdir())
+
+
+@pytest.mark.parametrize("profile", list(ContentProfile))
+def test_multiple_functions_have_distinct_tactile_styles_and_legend(
+	profile: ContentProfile,
+	monkeypatch: pytest.MonkeyPatch,
+	tmp_path: Path,
+):
+	from powercalc.core import tactile_plot
+
+	captured = []
+	original = tactile_plot._save_figure
+
+	def inspect_figure(figure, path, file_format):
+		captured.append(figure.axes[0])
+		original(figure, path, file_format)
+
+	monkeypatch.setattr(tactile_plot, "_save_figure", inspect_figure)
+	request = TactilePlotRequest(
+		"x^2",
+		label="Square",
+		additional_functions=(tactile_plot.PlotFunction("x", "Linear"),),
+		content_profile=profile,
+	)
+	path = export_tactile_plot(request, tmp_path / "multiple")
+	axis = captured[0]
+	lines = [
+		line for line in axis.lines if line.get_label() in {"Square", "Linear"}
+	]
+	assert path.exists()
+	assert [line.get_label() for line in lines] == ["Square", "Linear"]
+	assert all(line.get_color() == "black" for line in lines)
+	assert (lines[0].get_linestyle(), lines[0].get_marker()) != (
+		lines[1].get_linestyle(),
+		lines[1].get_marker(),
+	)
+	assert axis.get_legend() is not None
+
+
+def test_invalid_second_function_never_creates_output(tmp_path: Path):
+	from powercalc.core.tactile_plot import PlotFunction
+
+	request = TactilePlotRequest(
+		"x", additional_functions=(PlotFunction("__import__('os')", "Unsafe"),)
+	)
+	with pytest.raises(TactilePlotError, match="Function 2"):
+		export_tactile_plot(request, tmp_path / "plot")
+	assert not list(tmp_path.iterdir())

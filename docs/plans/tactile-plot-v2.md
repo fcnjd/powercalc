@@ -1,28 +1,31 @@
 # Tactile function plot v2
 
-Status: approved plan; implementation tracked by GitHub issue #4.
+Status: approved v2 plan, amended 2026-10-05 by the owner’s explicit
+multiple-function request; implementation tracked by GitHub issue #4.
 
 ## Goal
 
-Export one safely parsed, real-valued function of `x` as a tactile graphic
+Export up to six safely parsed, real-valued functions of `x` as a tactile graphic
 from a native, keyboard-operable Powercalc dialog.
 
 ## Scope
 
+- Multiple named functions on shared axes with a legend and profile-dependent
+  tactile line/marker cycles.
 - Separate `Swell paper` and `Embosser` content profiles.
 - Separate SVG and high-resolution PNG output formats.
 - A4 landscape default plus A4/A5 portrait/landscape sizes.
 - Opt-in German Grade 1 Unicode Braille labels backed by the accepted bundled
   Liblouis runtime.
 
-Not in scope: printer discovery/submission, vendor protocols, multiple series,
-legends, user-defined line styles, or claims of universal printer/paper
-compatibility.
+Not in scope: printer discovery/submission, vendor protocols, user-defined
+line styles, or claims of universal printer/paper compatibility.
 
 ## Source-to-requirement matrix
 
 | Source evidence | Requirement | UI / non-goal | Verification |
 | --- | --- | --- | --- |
+| Supplied notebook: `create_plot` and `add_plot` share axes, use a legend, and cycle line/marker styles. | Up to six independently parsed functions with optional legend names; monochrome styles distinguish curves by touch for either profile. | Add/remove function rows and legend labels; no custom style picker. | Multi-function export, legend/style and dialog tests. |
 | Supplied notebook: `use_swell_paper_styles`, black line/marker styles. | Monochrome, high-contrast `Swell paper` encoding. | Profile choice; no custom-style picker. | Profile export test and UI check. |
 | Notebook distinguishes swell-paper styling from other output. | `Embosser` is a separate content profile, not a device protocol. | Profile choice; no direct printing. | Profile export test. |
 | Notebook: `use_braille`. | Explicit opt-in labels only through verified Liblouis translation. | `Braille labels` checkbox; disabled with explanation when runtime is missing. | Translator and export tests; Windows smoke test. |
@@ -37,17 +40,20 @@ Dialog title: `Export tactile function plot`.
 
 Tab order and defaults:
 
-1. `Function of x` — current calculator input, otherwise `x^2`.
-2. `X minimum` — `-10`.
-3. `X maximum` — `10`.
-4. `Title` — `Tactile function plot`.
-5. `Content profile` — `Swell paper` default; `Swell paper`, `Embosser`.
-6. `Paper size` — `A4 landscape` default; A4/A5 portrait/landscape.
-7. `File format` — `SVG` default; `SVG`, `PNG`.
-8. `Braille labels` — unchecked; unavailable with an explanation when the
+1. `Function of x` — current calculator input, otherwise `x^2`; optional
+   `Function 1 legend label` defaults to the expression.
+2. `Add function` inserts labelled expression and optional legend-label fields
+   (up to six functions total), each with a `Remove function N` action.
+3. `X minimum` — `-10`.
+4. `X maximum` — `10`.
+5. `Title` — `Tactile function plot`.
+6. `Content profile` — `Swell paper` default; `Swell paper`, `Embosser`.
+7. `Paper size` — `A4 landscape` default; A4/A5 portrait/landscape.
+8. `File format` — `SVG` default; `SVG`, `PNG`.
+9. `Braille labels` — unchecked; unavailable with an explanation when the
    Liblouis runtime cannot be loaded.
-9. `Save plot…` opens a format-matched save dialog after validation.
-10. `Cancel` closes without output.
+10. `Save plot…` opens a format-matched save dialog after validation.
+11. `Cancel` closes without output.
 
 Success appears in the status bar with exact filename and format. Validation
 and export failures use readable text through the existing error path.
@@ -66,7 +72,8 @@ and export failures use readable text through the existing error path.
 
 ## Acceptance criteria
 
-1. Both profiles are selectable, monochrome, and intentionally distinct.
+1. Two or more named functions export on shared axes with a legend; each uses
+   a different tactile style for either selectable monochrome profile.
 2. Either profile exports SVG and PNG with matching suffix/filter/type.
 3. The four paper sizes are selectable, with A4 landscape default and tested
    physical dimensions.

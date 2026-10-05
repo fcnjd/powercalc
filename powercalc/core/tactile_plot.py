@@ -1,4 +1,4 @@
-"""Headless export of single-function tactile plots.
+"""Headless export of tactile function plots.
 
 The module intentionally contains no wxPython code.  The GUI supplies a
 validated :class:`TactilePlotRequest`; rendering, output selection, and
@@ -66,8 +66,16 @@ class BrailleTranslator(Protocol):
 
 
 @dataclass(frozen=True)
+class PlotFunction:
+	"""An additional function and its legend label."""
+
+	expression: str
+	label: str
+
+
+@dataclass(frozen=True)
 class TactilePlotRequest:
-	"""One real-valued function and its tactile export options."""
+	"""Real-valued functions and their tactile export options."""
 
 	expression: str
 	x_min: float = -10.0
@@ -78,6 +86,8 @@ class TactilePlotRequest:
 	file_format: PlotFileFormat = PlotFileFormat.SVG
 	use_braille_labels: bool = False
 	samples: int = 201
+	label: str = ""
+	additional_functions: tuple[PlotFunction, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -115,6 +125,28 @@ _PROFILE_STYLES = {
 	),
 }
 
+# Each line is identifiable by touch without relying on colour. The first
+# swell-paper line and following cycle follow the supplied notebook.
+_SERIES_STYLES = {
+	ContentProfile.SWELL_PAPER: (
+		("-", None),
+		("--", "o"),
+		("-.", "s"),
+		(":", "^"),
+		("-", "D"),
+		("--", "x"),
+	),
+	ContentProfile.EMBOSSER: (
+		("-", "s"),
+		(":", "o"),
+		("--", "^"),
+		("-.", "D"),
+		(":", "x"),
+		("--", "v"),
+	),
+}
+MAX_FUNCTIONS = 6
+
 _PAPER_SIZES_MM = {
 	PaperSize.A4_LANDSCAPE: (297.0, 210.0),
 	PaperSize.A4_PORTRAIT: (210.0, 297.0),
@@ -150,13 +182,16 @@ def export_tactile_plot(
 	high-resolution PNG.
 	"""
 
-	variable, expression = validate_tactile_plot_request(request, options)
-
-	points = _sample_real_points(variable, expression, request)
-	if not any(y_value is not None for _, y_value in points):
-		raise TactilePlotError(
-			"The function has no real, finite values in this x range."
-		)
+	validate_tactile_plot_request(request, options)
+	parsed = _parse_functions(request, options)
+	series = []
+	for variable, expression, legend in parsed:
+		points = _sample_real_points(variable, expression, request)
+		if not any(y_value is not None for _, y_value in points):
+			raise TactilePlotError(
+				f"Function {legend} has no real, finite values in this x range."
+			)
+		series.append((points, legend))
 
 	label = _labeler(request, braille_translator)
 	output_path = path.with_suffix(f".{request.file_format.value}")
@@ -164,7 +199,7 @@ def export_tactile_plot(
 	temporary_path = output_path.with_name(
 		f".{output_path.stem}.tmp{output_path.suffix}"
 	)
-	figure = _render_figure(request, points, label)
+	figure = _render_figure(request, series, label)
 	try:
 		_save_figure(figure, temporary_path, request.file_format)
 		temporary_path.replace(output_path)
@@ -185,7 +220,8 @@ def validate_tactile_plot_request(
 
 	_validate_request(request)
 	try:
-		return parse_function_expression(request.expression, options)
+		variable, expression, _ = _parse_functions(request, options)[0]
+		return variable, expression
 	except ExpressionError as exc:
 		raise TactilePlotError(exc.error.message) from exc
 	except (SyntaxError, TypeError, ValueError, RecursionError) as exc:
@@ -214,6 +250,42 @@ def _validate_request(request: TactilePlotRequest) -> None:
 		)
 	if not 21 <= request.samples <= 2001:
 		raise TactilePlotError("Samples must be between 21 and 2001.")
+	if len(request.additional_functions) + 1 > MAX_FUNCTIONS:
+		raise TactilePlotError(
+			f"At most {MAX_FUNCTIONS} functions are supported."
+		)
+	for entry in request.additional_functions:
+		if not isinstance(entry, PlotFunction):
+			raise TactilePlotError("Invalid additional function.")
+	for legend in (
+		request.label,
+		*(item.label for item in request.additional_functions),
+	):
+		if len(legend) > 80 or "\n" in legend or "\r" in legend:
+			raise TactilePlotError(
+				"Function labels must be one line of at most 80 characters."
+			)
+
+
+def _parse_functions(
+	request: TactilePlotRequest,
+	options: EvaluationOptions | None,
+) -> list[tuple[sp.Symbol, sp.Expr, str]]:
+	"""Parse every curve through the restricted calculator parser."""
+
+	parsed = []
+	entries = ((request.expression, request.label),) + tuple(
+		(item.expression, item.label) for item in request.additional_functions
+	)
+	for index, (source, legend) in enumerate(entries, 1):
+		try:
+			variable, expression = parse_function_expression(source, options)
+		except ExpressionError as exc:
+			raise TactilePlotError(
+				f"Function {index}: {exc.error.message}"
+			) from exc
+		parsed.append((variable, expression, legend.strip() or source.strip()))
+	return parsed
 
 
 def _labeler(
@@ -235,7 +307,7 @@ def _labeler(
 
 def _render_figure(
 	request: TactilePlotRequest,
-	points: list[tuple[float, float | None]],
+	series: list[tuple[list[tuple[float, float | None]], str]],
 	label,
 ):
 	style = _PROFILE_STYLES[request.content_profile]
@@ -248,15 +320,25 @@ def _render_figure(
 		figure, axis = plt.subplots(
 			figsize=paper_dimensions_inches(request.paper_size)
 		)
-		for x_values, y_values in _segments(points):
-			axis.plot(
-				x_values,
-				y_values,
-				color="black",
-				linewidth=style.line_width,
-				marker=style.marker,
-				markersize=style.marker_size,
-				markevery=max(1, len(x_values) // style.marker_count),
+		for index, (points, legend) in enumerate(series):
+			line_style, marker = _SERIES_STYLES[request.content_profile][index]
+			for segment_index, (x_values, y_values) in enumerate(
+				_segments(points)
+			):
+				axis.plot(
+					x_values,
+					y_values,
+					color="black",
+					linestyle=line_style,
+					linewidth=style.line_width,
+					marker=marker,
+					markersize=style.marker_size,
+					markevery=max(1, len(x_values) // style.marker_count),
+					label=label(legend) if segment_index == 0 else None,
+				)
+		if len(series) > 1:
+			axis.legend(
+				loc="upper left", bbox_to_anchor=(1.01, 1), frameon=False
 			)
 		axis.axhline(0, color="black", linewidth=style.axis_width)
 		axis.axvline(0, color="black", linewidth=style.axis_width)

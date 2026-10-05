@@ -38,7 +38,47 @@ def test_dialog_exposes_the_approved_v2_options_and_actions():
 			child.GetLabel()
 			for child in dialog.GetChildren()
 			if isinstance(child, wx.Button)
-		] == ["Save plot…", "Cancel"]
+		] == ["Add function", "Save plot…", "Cancel"]
+	finally:
+		dialog.Destroy()
+		app.Destroy()
+
+
+def test_dialog_adds_and_removes_labelled_function_rows():
+	app = wx.App(False)
+	dialog = TactilePlotDialog(None, "x")
+	try:
+		assert dialog.add_function_button.GetLabel() == "Add function"
+		dialog._on_add_function(wx.CommandEvent())
+		row, expression, legend = dialog.additional_rows[0]
+		assert expression.GetName() == "Function 2 of x"
+		assert legend.GetName() == "Function 2 legend label"
+		expression.SetValue("x^2")
+		legend.SetValue("Square")
+		request = dialog.get_request()
+		assert [
+			(item.expression, item.label)
+			for item in request.additional_functions
+		] == [("x^2", "Square")]
+		dialog._remove_row(row)
+		assert dialog.get_request().additional_functions == ()
+	finally:
+		dialog.Destroy()
+		app.Destroy()
+
+
+def test_dialog_bounds_function_rows_and_keeps_them_scrollable():
+	app = wx.App(False)
+	dialog = TactilePlotDialog(None, "x")
+	try:
+		for _ in range(5):
+			dialog._on_add_function(wx.CommandEvent())
+		assert len(dialog.get_request().additional_functions) == 5
+		assert not dialog.add_function_button.IsEnabled()
+		assert dialog.GetSize().height <= 720
+		assert dialog.additional_panel.HasScrollbar(wx.VERTICAL)
+		dialog._remove_row(dialog.additional_rows[0][0])
+		assert dialog.add_function_button.IsEnabled()
 	finally:
 		dialog.Destroy()
 		app.Destroy()

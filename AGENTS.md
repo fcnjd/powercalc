@@ -471,3 +471,13 @@ Update this file when any of the following change:
 - parser or mathematics strategy
 - public Core API contracts
 - workflow rules for future agents or contributors
+
+## Tactile plot series
+
+The tactile export request accepts a first expression plus up to five
+`PlotFunction` entries (six curves total). Each expression uses the restricted
+calculator parser independently. Empty legend names fall back to the expression.
+Both profiles use monochrome, profile-specific dash/marker cycles; SVG versus
+PNG remains independent of the content profile. The native dialog provides
+Add/Remove function controls with labelled fields. See
+`docs/plans/tactile-plot-v2.md` for UX and acceptance criteria.
