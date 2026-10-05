@@ -45,6 +45,8 @@ class ContentProfile(StrEnum):
 class PaperSize(StrEnum):
 	"""Physical paper sizes supported by the v2 exporter."""
 
+	A3_LANDSCAPE = "a3-landscape"
+	A3_PORTRAIT = "a3-portrait"
 	A4_LANDSCAPE = "a4-landscape"
 	A4_PORTRAIT = "a4-portrait"
 	A5_LANDSCAPE = "a5-landscape"
@@ -156,6 +158,8 @@ def function_name(index: int) -> str:
 
 
 _PAPER_SIZES_MM = {
+	PaperSize.A3_LANDSCAPE: (420.0, 297.0),
+	PaperSize.A3_PORTRAIT: (297.0, 420.0),
 	PaperSize.A4_LANDSCAPE: (297.0, 210.0),
 	PaperSize.A4_PORTRAIT: (210.0, 297.0),
 	PaperSize.A5_LANDSCAPE: (210.0, 148.0),

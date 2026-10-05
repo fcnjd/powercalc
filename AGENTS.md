@@ -481,6 +481,8 @@ through `k(x)`; empty legend names fall back to those names. The notebook
 cycles six styles without imposing a maximum, but the application caps
 functions at six to avoid repeated styles and crowded legends.
 Both profiles use monochrome, profile-specific dash/marker cycles; SVG versus
-PNG remains independent of the content profile. The native dialog provides
+PNG remains independent of the content profile. ISO A3, A4 and A5 are
+available in landscape and portrait orientations; A4 landscape remains the
+default. A3 dimensions are 420 × 297 mm landscape and 297 × 420 mm portrait. The native dialog provides
 Add/Remove function controls with labelled fields. See
 `docs/plans/tactile-plot-v2.md` for UX and acceptance criteria.

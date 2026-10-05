@@ -38,11 +38,17 @@ def test_profiles_export_distinct_monochrome_svg_graphics(tmp_path: Path):
 	assert "stroke-dasharray" not in embosser_svg
 
 
-def test_png_export_uses_selected_format_and_high_resolution(tmp_path: Path):
+@pytest.mark.parametrize(
+	"paper_size",
+	[PaperSize.A5_PORTRAIT, PaperSize.A3_LANDSCAPE, PaperSize.A3_PORTRAIT],
+)
+def test_png_export_uses_selected_format_and_high_resolution(
+	tmp_path: Path, paper_size: PaperSize
+):
 	path = export_tactile_plot(
 		TactilePlotRequest(
 			"x",
-			paper_size=PaperSize.A5_PORTRAIT,
+			paper_size=paper_size,
 			file_format=PlotFileFormat.PNG,
 		),
 		tmp_path / "plot.svg",
@@ -54,13 +60,16 @@ def test_png_export_uses_selected_format_and_high_resolution(tmp_path: Path):
 		assert image.read(4) == b"\x00\x00\x00\r"
 		assert image.read(4) == b"IHDR"
 		width, height = struct.unpack(">II", image.read(8))
-	assert width > 1500
-	assert height > 2000
+	expected_width, expected_height = paper_dimensions_inches(paper_size)
+	assert width == pytest.approx(expected_width * 300, abs=2)
+	assert height == pytest.approx(expected_height * 300, abs=2)
 
 
 @pytest.mark.parametrize(
 	("paper_size", "expected_inches"),
 	[
+		(PaperSize.A3_LANDSCAPE, (420 / 25.4, 297 / 25.4)),
+		(PaperSize.A3_PORTRAIT, (297 / 25.4, 420 / 25.4)),
 		(PaperSize.A4_LANDSCAPE, (297 / 25.4, 210 / 25.4)),
 		(PaperSize.A4_PORTRAIT, (210 / 25.4, 297 / 25.4)),
 		(PaperSize.A5_LANDSCAPE, (210 / 25.4, 148 / 25.4)),
@@ -74,9 +83,12 @@ def test_paper_sizes_have_expected_physical_dimensions(
 	assert paper_dimensions_inches(paper_size) == pytest.approx(expected_inches)
 
 
-def test_svg_preserves_selected_physical_paper_size(tmp_path: Path):
+@pytest.mark.parametrize("paper_size", list(PaperSize))
+def test_svg_preserves_selected_physical_paper_size(
+	tmp_path: Path, paper_size: PaperSize
+):
 	path = export_tactile_plot(
-		TactilePlotRequest("x", paper_size=PaperSize.A4_LANDSCAPE),
+		TactilePlotRequest("x", paper_size=paper_size),
 		tmp_path / "plot",
 	)
 	svg = path.read_text(encoding="utf-8")
@@ -84,7 +96,7 @@ def test_svg_preserves_selected_physical_paper_size(tmp_path: Path):
 	assert match is not None
 	width, height = (float(value) / 72 for value in match.groups())
 	assert (width, height) == pytest.approx(
-		paper_dimensions_inches(PaperSize.A4_LANDSCAPE), abs=0.01
+		paper_dimensions_inches(paper_size), abs=0.01
 	)
 
 

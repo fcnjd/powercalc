@@ -24,6 +24,8 @@ def test_dialog_exposes_the_approved_v2_options_and_actions():
 		assert dialog.title_input.GetName() == "Title"
 		assert dialog.profile_choice.GetStrings() == ["Swell paper", "Embosser"]
 		assert dialog.paper_size_choice.GetStrings() == [
+			"A3 landscape",
+			"A3 portrait",
 			"A4 landscape",
 			"A4 portrait",
 			"A5 landscape",
@@ -32,6 +34,12 @@ def test_dialog_exposes_the_approved_v2_options_and_actions():
 		assert dialog.file_format_choice.GetStrings() == ["SVG", "PNG"]
 		assert request.content_profile is ContentProfile.SWELL_PAPER
 		assert request.paper_size is PaperSize.A4_LANDSCAPE
+		for label, paper_size in (
+			("A3 landscape", PaperSize.A3_LANDSCAPE),
+			("A3 portrait", PaperSize.A3_PORTRAIT),
+		):
+			dialog.paper_size_choice.SetStringSelection(label)
+			assert dialog.get_request().paper_size is paper_size
 		assert request.file_format is PlotFileFormat.SVG
 		assert dialog.save_button.GetLabel() == "Save plot…"
 		assert [

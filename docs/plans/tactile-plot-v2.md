@@ -1,7 +1,7 @@
 # Tactile function plot v2
 
-Status: approved v2 plan, amended 2026-10-05 by the owner’s explicit
-multiple-function request; implementation tracked by GitHub issue #4.
+Status: approved v2 plan, amended 2026-10-05 for multiple functions and A3
+paper support; implementation tracked by GitHub issue #4.
 
 ## Goal
 
@@ -14,7 +14,7 @@ from a native, keyboard-operable Powercalc dialog.
   tactile line/marker cycles.
 - Separate `Swell paper` and `Embosser` content profiles.
 - Separate SVG and high-resolution PNG output formats.
-- A4 landscape default plus A4/A5 portrait/landscape sizes.
+- A4 landscape default plus A3/A4/A5 portrait/landscape sizes.
 - Opt-in German Grade 1 Unicode Braille labels backed by the accepted bundled
   Liblouis runtime.
 
@@ -30,7 +30,7 @@ line styles, or claims of universal printer/paper compatibility.
 | Notebook distinguishes swell-paper styling from other output. | `Embosser` is a separate content profile, not a device protocol. | Profile choice; no direct printing. | Profile export test. |
 | Notebook: `use_braille`. | Explicit opt-in labels only through verified Liblouis translation. | `Braille labels` checkbox; disabled with explanation when runtime is missing. | Translator and export tests; Windows smoke test. |
 | Owner requires a rendered alternative to avoid SVG viewer/font variance. | SVG and PNG are independently selectable. | Format choice controls save filter and suffix. | SVG/PNG type and dimension tests. |
-| Owner chose selectable paper format with A4 landscape default. | Four physical paper-size choices. | Paper-size choice. | Figure-dimension and UI-default checks. |
+| Owner chose selectable paper format with A4 landscape default; subsequent A3 request. | Six ISO paper-size choices: A3 (420 × 297 mm landscape, 297 × 420 mm portrait), A4 and A5 in both orientations. | Paper-size choice, A4 landscape remains default. | Figure-dimension, SVG/PNG and UI-default checks. |
 | Existing calculator avoids `eval`. | Plot parser permits only `x` in addition to calculator syntax. | Function input and readable error. | Parser/security regression tests. |
 | Native accessible UI rule. | All fields labelled and keyboard-reachable; only context-appropriate actions. | `Save plot…` and `Cancel`, no generic Apply/Yes/No. | Target-platform UI checklist. |
 
@@ -51,7 +51,7 @@ Tab order and defaults:
 4. `X maximum` — `10`.
 5. `Title` — `Tactile function plot`.
 6. `Content profile` — `Swell paper` default; `Swell paper`, `Embosser`.
-7. `Paper size` — `A4 landscape` default; A4/A5 portrait/landscape.
+7. `Paper size` — `A4 landscape` default; A3/A4/A5 portrait/landscape.
 8. `File format` — `SVG` default; `SVG`, `PNG`.
 9. `Braille labels` — unchecked; unavailable with an explanation when the
    Liblouis runtime cannot be loaded.
@@ -66,7 +66,7 @@ and export failures use readable text through the existing error path.
 The notebook uses `itertools.cycle(self._tactile_styles)` with six style
 dictionaries; `add_plot` consumes the next style and has no count check. Its
 examples plot two functions. Powercalc caps the count at six so each curve has
-a distinct profile style and the legend remains manageable on A5/A4.
+a distinct profile style and the legend remains manageable on A5/A4/A3.
 
 ## Technical constraints
 
@@ -86,8 +86,9 @@ a distinct profile style and the legend remains manageable on A5/A4.
    a different tactile style for either selectable monochrome profile.
 2. Either profile exports SVG and PNG with matching suffix/filter/type;
    overwrite confirmation applies to the actual normalized output filename.
-3. The four paper sizes are selectable, with A4 landscape default and tested
-   physical dimensions.
+3. The six paper sizes are selectable, with A4 landscape default and tested
+   physical dimensions. A3 is 420 × 297 mm landscape or 297 × 420 mm
+   portrait in SVG and 300 DPI PNG.
 4. Dialog labels, defaults, tab order and actions match this contract; the
    core rejects a seventh function even when called without the dialog.
 5. Invalid bounds, expressions, modes and unwritable paths are readable

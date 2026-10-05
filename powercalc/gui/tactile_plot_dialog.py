@@ -23,6 +23,8 @@ _PROFILE_CHOICES = (
 	(_("Embosser"), ContentProfile.EMBOSSER),
 )
 _PAPER_SIZE_CHOICES = (
+	(_("A3 landscape"), PaperSize.A3_LANDSCAPE),
+	(_("A3 portrait"), PaperSize.A3_PORTRAIT),
 	(_("A4 landscape"), PaperSize.A4_LANDSCAPE),
 	(_("A4 portrait"), PaperSize.A4_PORTRAIT),
 	(_("A5 landscape"), PaperSize.A5_LANDSCAPE),
@@ -129,6 +131,8 @@ class TactilePlotDialog(wx.Dialog):
 		self.paper_size_choice = self._add_choice(
 			grid, _("Paper size"), _PAPER_SIZE_CHOICES
 		)
+		# A4 landscape remains the default despite the new A3 options.
+		self.paper_size_choice.SetSelection(2)
 		self.file_format_choice = self._add_choice(
 			grid, _("File format"), _FORMAT_CHOICES
 		)

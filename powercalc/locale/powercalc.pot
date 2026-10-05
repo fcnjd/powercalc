@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Powercalc VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-05 17:21+0000\n"
+"POT-Creation-Date: 2026-10-05 17:49+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -539,116 +539,124 @@ msgid "Embosser"
 msgstr ""
 
 #: powercalc/gui/tactile_plot_dialog.py:26
-msgid "A4 landscape"
+msgid "A3 landscape"
 msgstr ""
 
 #: powercalc/gui/tactile_plot_dialog.py:27
-msgid "A4 portrait"
+msgid "A3 portrait"
 msgstr ""
 
 #: powercalc/gui/tactile_plot_dialog.py:28
-msgid "A5 landscape"
+msgid "A4 landscape"
 msgstr ""
 
 #: powercalc/gui/tactile_plot_dialog.py:29
+msgid "A4 portrait"
+msgstr ""
+
+#: powercalc/gui/tactile_plot_dialog.py:30
+msgid "A5 landscape"
+msgstr ""
+
+#: powercalc/gui/tactile_plot_dialog.py:31
 msgid "A5 portrait"
 msgstr ""
 
-#: powercalc/gui/tactile_plot_dialog.py:50
+#: powercalc/gui/tactile_plot_dialog.py:52
 #, python-brace-format
 msgid "The selected format will save to {path}. Replace this existing file?"
 msgstr ""
 
-#: powercalc/gui/tactile_plot_dialog.py:53
+#: powercalc/gui/tactile_plot_dialog.py:55
 msgid "Replace tactile plot?"
 msgstr ""
 
-#: powercalc/gui/tactile_plot_dialog.py:66
+#: powercalc/gui/tactile_plot_dialog.py:68
 msgid "Export tactile function plot"
 msgstr ""
 
-#: powercalc/gui/tactile_plot_dialog.py:71
+#: powercalc/gui/tactile_plot_dialog.py:73
 msgid ""
 "Export up to six real-valued functions of x as a tactile graphic. The "
 "content profile and file format are selected separately."
 msgstr ""
 
-#: powercalc/gui/tactile_plot_dialog.py:87
-#: powercalc/gui/tactile_plot_dialog.py:201
-#: powercalc/gui/tactile_plot_dialog.py:257
+#: powercalc/gui/tactile_plot_dialog.py:91
+#: powercalc/gui/tactile_plot_dialog.py:207
+#: powercalc/gui/tactile_plot_dialog.py:266
 #, python-brace-format
 msgid "Legend label for {function}"
 msgstr ""
 
-#: powercalc/gui/tactile_plot_dialog.py:108
-#: powercalc/gui/tactile_plot_dialog.py:109
+#: powercalc/gui/tactile_plot_dialog.py:113
+#: powercalc/gui/tactile_plot_dialog.py:114
 msgid "Add function"
 msgstr ""
 
-#: powercalc/gui/tactile_plot_dialog.py:118
+#: powercalc/gui/tactile_plot_dialog.py:123
 msgid "X minimum"
 msgstr ""
 
-#: powercalc/gui/tactile_plot_dialog.py:119
+#: powercalc/gui/tactile_plot_dialog.py:124
 msgid "X maximum"
 msgstr ""
 
-#: powercalc/gui/tactile_plot_dialog.py:121
+#: powercalc/gui/tactile_plot_dialog.py:126
 msgid "Title"
 msgstr ""
 
-#: powercalc/gui/tactile_plot_dialog.py:121
+#: powercalc/gui/tactile_plot_dialog.py:126
 msgid "Tactile function plot"
 msgstr ""
 
-#: powercalc/gui/tactile_plot_dialog.py:124
+#: powercalc/gui/tactile_plot_dialog.py:129
 msgid "Content profile"
 msgstr ""
 
-#: powercalc/gui/tactile_plot_dialog.py:127
+#: powercalc/gui/tactile_plot_dialog.py:132
 msgid "Paper size"
 msgstr ""
 
-#: powercalc/gui/tactile_plot_dialog.py:130
+#: powercalc/gui/tactile_plot_dialog.py:136
 msgid "File format"
 msgstr ""
 
-#: powercalc/gui/tactile_plot_dialog.py:137
-#: powercalc/gui/tactile_plot_dialog.py:138
+#: powercalc/gui/tactile_plot_dialog.py:143
+#: powercalc/gui/tactile_plot_dialog.py:144
 msgid "Braille labels"
 msgstr ""
 
-#: powercalc/gui/tactile_plot_dialog.py:141
+#: powercalc/gui/tactile_plot_dialog.py:147
 msgid "Use bundled Liblouis for German Grade 1 Braille labels."
 msgstr ""
 
-#: powercalc/gui/tactile_plot_dialog.py:148
+#: powercalc/gui/tactile_plot_dialog.py:154
 msgid ""
 "Braille labels are unavailable because this installation does not include"
 " the Liblouis runtime."
 msgstr ""
 
-#: powercalc/gui/tactile_plot_dialog.py:154
+#: powercalc/gui/tactile_plot_dialog.py:160
 msgid ""
 "Braille labels require the bundled Liblouis runtime and are unavailable "
 "in this installation."
 msgstr ""
 
-#: powercalc/gui/tactile_plot_dialog.py:171
+#: powercalc/gui/tactile_plot_dialog.py:177
 msgid "Save plot…"
 msgstr ""
 
-#: powercalc/gui/tactile_plot_dialog.py:172
+#: powercalc/gui/tactile_plot_dialog.py:178
 msgid "Cancel"
 msgstr ""
 
-#: powercalc/gui/tactile_plot_dialog.py:220
-#: powercalc/gui/tactile_plot_dialog.py:269
+#: powercalc/gui/tactile_plot_dialog.py:229
+#: powercalc/gui/tactile_plot_dialog.py:279
 #, python-brace-format
 msgid "Remove {function}"
 msgstr ""
 
-#: powercalc/gui/tactile_plot_dialog.py:313
+#: powercalc/gui/tactile_plot_dialog.py:324
 msgid "X minimum and maximum must be numbers."
 msgstr ""
 
