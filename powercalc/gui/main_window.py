@@ -27,7 +27,10 @@ from powercalc.gui.formatting import (
 )
 from powercalc.gui.index_dialog import FunctionIndexDialog
 from powercalc.gui.resources import get_app_icon_path
-from powercalc.gui.tactile_plot_dialog import TactilePlotDialog
+from powercalc.gui.tactile_plot_dialog import (
+	TactilePlotDialog,
+	confirm_plot_output_path,
+)
 from powercalc.settings import AppSettings, SettingsSaveError, SettingsStore
 from powercalc.version import get_version, get_versioned_title
 
@@ -623,14 +626,21 @@ class MainFrame(wx.Frame):
 			if save_dialog.ShowModal() != wx.ID_OK:
 				event.Skip(False)
 				return
-			path = save_dialog.GetPath()
+			selected_path = Path(save_dialog.GetPath())
 		finally:
 			save_dialog.Destroy()
+
+		output_path = confirm_plot_output_path(
+			self, selected_path, request.file_format
+		)
+		if output_path is None:
+			event.Skip(False)
+			return
 
 		try:
 			exported_path = export_tactile_plot(
 				request,
-				Path(path),
+				output_path,
 				self.settings.evaluation_options(),
 			)
 		except TactilePlotError as exc:

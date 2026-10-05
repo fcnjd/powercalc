@@ -53,6 +53,8 @@ Tab order and defaults:
 9. `Braille labels` — unchecked; unavailable with an explanation when the
    Liblouis runtime cannot be loaded.
 10. `Save plot…` opens a format-matched save dialog after validation.
+    If a typed suffix changes to the selected format and the actual output
+    file already exists, the actual filename receives an overwrite prompt.
 11. `Cancel` closes without output.
 
 Success appears in the status bar with exact filename and format. Validation
@@ -74,7 +76,8 @@ and export failures use readable text through the existing error path.
 
 1. Two or more named functions export on shared axes with a legend; each uses
    a different tactile style for either selectable monochrome profile.
-2. Either profile exports SVG and PNG with matching suffix/filter/type.
+2. Either profile exports SVG and PNG with matching suffix/filter/type;
+   overwrite confirmation applies to the actual normalized output filename.
 3. The four paper sizes are selectable, with A4 landscape default and tested
    physical dimensions.
 4. Dialog labels, defaults, tab order and actions match this contract.

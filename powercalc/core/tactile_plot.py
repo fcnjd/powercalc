@@ -194,8 +194,11 @@ def export_tactile_plot(
 		series.append((points, legend))
 
 	label = _labeler(request, braille_translator)
-	output_path = path.with_suffix(f".{request.file_format.value}")
-	output_path.parent.mkdir(parents=True, exist_ok=True)
+	output_path = plot_output_path(path, request.file_format)
+	try:
+		output_path.parent.mkdir(parents=True, exist_ok=True)
+	except OSError as exc:
+		raise TactilePlotError(f"Could not write plot: {exc}") from exc
 	temporary_path = output_path.with_name(
 		f".{output_path.stem}.tmp{output_path.suffix}"
 	)
@@ -210,6 +213,12 @@ def export_tactile_plot(
 		if temporary_path.exists():
 			temporary_path.unlink()
 	return output_path
+
+
+def plot_output_path(path: Path, file_format: PlotFileFormat) -> Path:
+	"""Return the actual output filename for the selected file format."""
+
+	return path.with_suffix(f".{file_format.value}")
 
 
 def validate_tactile_plot_request(

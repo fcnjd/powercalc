@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import wx
 
 from powercalc.core.tactile_plot import (
@@ -12,6 +14,7 @@ from powercalc.core.tactile_plot import (
 	MAX_FUNCTIONS,
 	TactilePlotRequest,
 	braille_labels_available,
+	plot_output_path,
 )
 
 _PROFILE_CHOICES = (
@@ -28,6 +31,31 @@ _FORMAT_CHOICES = (
 	("SVG", PlotFileFormat.SVG),
 	("PNG", PlotFileFormat.PNG),
 )
+
+
+def confirm_plot_output_path(
+	parent: wx.Window,
+	selected_path: Path,
+	file_format: PlotFileFormat,
+) -> Path | None:
+	"""Confirm overwriting the actual output when its suffix changes."""
+
+	output_path = plot_output_path(selected_path, file_format)
+	if output_path == selected_path or not output_path.exists():
+		return output_path
+	confirmation = wx.MessageDialog(
+		parent,
+		_(
+			"The selected format will save to {path}. "
+			"Replace this existing file?"
+		).format(path=output_path),
+		_("Replace tactile plot?"),
+		wx.YES_NO | wx.NO_DEFAULT | wx.ICON_WARNING,
+	)
+	try:
+		return output_path if confirmation.ShowModal() == wx.ID_YES else None
+	finally:
+		confirmation.Destroy()
 
 
 class TactilePlotDialog(wx.Dialog):
@@ -65,7 +93,6 @@ class TactilePlotDialog(wx.Dialog):
 		self.additional_rows: list[
 			tuple[wx.Panel, wx.TextCtrl, wx.TextCtrl]
 		] = []
-		self._next_function_number = 2
 		self.additional_panel = wx.ScrolledWindow(
 			self, style=wx.VSCROLL | wx.TAB_TRAVERSAL
 		)
@@ -162,8 +189,7 @@ class TactilePlotDialog(wx.Dialog):
 	def _on_add_function(self, event: wx.Event) -> None:
 		"""Add an accessible expression/legend pair below the first function."""
 
-		index = self._next_function_number
-		self._next_function_number += 1
+		index = len(self.additional_rows) + 2
 		row = wx.Panel(self.additional_panel)
 		row_sizer = wx.BoxSizer(wx.VERTICAL)
 		fields = wx.FlexGridSizer(cols=2, hgap=8, vgap=5)
@@ -195,6 +221,7 @@ class TactilePlotDialog(wx.Dialog):
 		row.SetSizer(row_sizer)
 		self.additional_sizer.Add(row, 0, wx.EXPAND | wx.TOP, 8)
 		self.additional_rows.append((row, expression, legend))
+		self._renumber_rows()
 		self._resize_additional_rows()
 		self.add_function_button.Enable(
 			len(self.additional_rows) + 1 < MAX_FUNCTIONS
@@ -207,9 +234,36 @@ class TactilePlotDialog(wx.Dialog):
 		]
 		self.additional_sizer.Detach(row)
 		row.Destroy()
+		self._renumber_rows()
 		self.add_function_button.Enable()
 		self._resize_additional_rows()
 		self.add_function_button.SetFocus()
+
+	def _renumber_rows(self) -> None:
+		"""Keep accessible numbers aligned with validation errors."""
+
+		for number, (row, expression, legend) in enumerate(
+			self.additional_rows, 2
+		):
+			labels = [
+				child
+				for child in row.GetChildren()
+				if isinstance(child, wx.StaticText)
+			]
+			expression_label = _("Function {number} of x").format(number=number)
+			legend_label = _("Function {number} legend label").format(
+				number=number
+			)
+			labels[0].SetLabel(expression_label)
+			labels[1].SetLabel(legend_label)
+			expression.SetName(expression_label)
+			legend.SetName(legend_label)
+			button = next(
+				child
+				for child in row.GetChildren()
+				if isinstance(child, wx.Button)
+			)
+			button.SetLabel(_("Remove function {number}").format(number=number))
 
 	def _resize_additional_rows(self) -> None:
 		self.additional_panel.FitInside()

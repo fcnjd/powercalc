@@ -175,3 +175,23 @@ def test_invalid_second_function_never_creates_output(tmp_path: Path):
 	with pytest.raises(TactilePlotError, match="Function 2"):
 		export_tactile_plot(request, tmp_path / "plot")
 	assert not list(tmp_path.iterdir())
+
+
+def test_output_suffix_is_normalized_before_export(tmp_path: Path):
+	from powercalc.core.tactile_plot import plot_output_path
+
+	selected = tmp_path / "plot.txt"
+	assert (
+		plot_output_path(selected, PlotFileFormat.SVG) == tmp_path / "plot.svg"
+	)
+	assert (
+		plot_output_path(selected, PlotFileFormat.PNG) == tmp_path / "plot.png"
+	)
+
+
+def test_unwritable_parent_is_readable_error(tmp_path: Path):
+	parent = tmp_path / "not-a-directory"
+	parent.write_text("keep this file", encoding="utf-8")
+	with pytest.raises(TactilePlotError, match="Could not write plot"):
+		export_tactile_plot(TactilePlotRequest("x"), parent / "plot")
+	assert parent.read_text(encoding="utf-8") == "keep this file"

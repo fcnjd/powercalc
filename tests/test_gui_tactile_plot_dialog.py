@@ -89,3 +89,83 @@ def test_dialog_bounds_function_rows_and_keeps_them_scrollable():
 	finally:
 		dialog.Destroy()
 		app.Destroy()
+
+
+def test_remove_and_readd_keeps_accessible_function_numbers_in_sync():
+	app = wx.App(False)
+	dialog = TactilePlotDialog(None, "x")
+	try:
+		for _ in range(3):
+			dialog._on_add_function(wx.CommandEvent())
+		dialog._remove_row(dialog.additional_rows[0][0])
+		assert [field.GetName() for _, field, _ in dialog.additional_rows] == [
+			"Function 2 of x",
+			"Function 3 of x",
+		]
+		dialog._on_add_function(wx.CommandEvent())
+		assert [field.GetName() for _, field, _ in dialog.additional_rows] == [
+			"Function 2 of x",
+			"Function 3 of x",
+			"Function 4 of x",
+		]
+		for number, (row, _, legend) in enumerate(dialog.additional_rows, 2):
+			assert legend.GetName() == f"Function {number} legend label"
+			buttons = [
+				child
+				for child in row.GetChildren()
+				if isinstance(child, wx.Button)
+			]
+			assert buttons[0].GetLabel() == f"Remove function {number}"
+	finally:
+		dialog.Destroy()
+		app.Destroy()
+
+
+def test_actual_export_target_requires_confirmation_when_suffix_changes(
+	monkeypatch,
+	tmp_path,
+):
+	from powercalc.gui import tactile_plot_dialog
+
+	selected = tmp_path / "plot.txt"
+	actual = tmp_path / "plot.svg"
+	actual.write_text("existing plot", encoding="utf-8")
+	seen = []
+
+	class FakeConfirmation:
+		def __init__(self, parent, message, title, style):
+			seen.append((message, title, style))
+			self.result = wx.ID_NO
+
+		def ShowModal(self):
+			return self.result
+
+		def Destroy(self):
+			pass
+
+	monkeypatch.setattr(
+		tactile_plot_dialog.wx, "MessageDialog", FakeConfirmation
+	)
+	assert (
+		tactile_plot_dialog.confirm_plot_output_path(
+			None, selected, PlotFileFormat.SVG
+		)
+		is None
+	)
+	assert str(actual) in seen[0][0]
+	assert actual.read_text(encoding="utf-8") == "existing plot"
+
+	monkeypatch.setattr(FakeConfirmation, "ShowModal", lambda self: wx.ID_YES)
+	assert (
+		tactile_plot_dialog.confirm_plot_output_path(
+			None, selected, PlotFileFormat.SVG
+		)
+		== actual
+	)
+	assert (
+		tactile_plot_dialog.confirm_plot_output_path(
+			None, tmp_path / "new.txt", PlotFileFormat.SVG
+		)
+		== tmp_path / "new.svg"
+	)
+	assert len(seen) == 2

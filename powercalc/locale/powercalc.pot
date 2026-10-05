@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Powercalc VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-05 14:21+0000\n"
+"POT-Creation-Date: 2026-10-05 14:35+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -154,7 +154,7 @@ msgstr ""
 msgid "Functions and constants"
 msgstr ""
 
-#: powercalc/gui/main_window.py:43
+#: powercalc/gui/main_window.py:46
 msgid ""
 "Keyboard commands:\n"
 "\n"
@@ -176,348 +176,348 @@ msgid ""
 "Alt+F4: Exit."
 msgstr ""
 
-#: powercalc/gui/main_window.py:67
+#: powercalc/gui/main_window.py:70
 msgid "Decimal Precision"
 msgstr ""
 
-#: powercalc/gui/main_window.py:71
+#: powercalc/gui/main_window.py:74
 msgid "Decimal precision, from 1 to 100"
 msgstr ""
 
-#: powercalc/gui/main_window.py:79
+#: powercalc/gui/main_window.py:82
 msgid "Decimal precision, 1 to 100"
 msgstr ""
 
-#: powercalc/gui/main_window.py:143
+#: powercalc/gui/main_window.py:146
 msgid "Ready."
 msgstr ""
 
-#: powercalc/gui/main_window.py:152
+#: powercalc/gui/main_window.py:155
 msgid "Export &Tactile Plot…\tCtrl+Shift+P"
 msgstr ""
 
-#: powercalc/gui/main_window.py:153
+#: powercalc/gui/main_window.py:156
 msgid "Export a tactile function plot"
 msgstr ""
 
-#: powercalc/gui/main_window.py:158
+#: powercalc/gui/main_window.py:161
 msgid "E&xit"
 msgstr ""
 
-#: powercalc/gui/main_window.py:159
+#: powercalc/gui/main_window.py:162
 msgid "Exit Powercalc"
 msgstr ""
 
-#: powercalc/gui/main_window.py:167
+#: powercalc/gui/main_window.py:170
 msgid "&File"
 msgstr ""
 
-#: powercalc/gui/main_window.py:172
+#: powercalc/gui/main_window.py:175
 msgid "Clear &Input\tCtrl+L"
 msgstr ""
 
-#: powercalc/gui/main_window.py:173
+#: powercalc/gui/main_window.py:176
 msgid "Clear the expression input"
 msgstr ""
 
-#: powercalc/gui/main_window.py:177
+#: powercalc/gui/main_window.py:180
 msgid "Copy &Result"
 msgstr ""
 
-#: powercalc/gui/main_window.py:178
+#: powercalc/gui/main_window.py:181
 msgid "Copy the result output"
 msgstr ""
 
-#: powercalc/gui/main_window.py:182
+#: powercalc/gui/main_window.py:185
 msgid "&Function Index...\tCtrl+Shift+X"
 msgstr ""
 
-#: powercalc/gui/main_window.py:183
+#: powercalc/gui/main_window.py:186
 msgid "Open the function and constant index"
 msgstr ""
 
-#: powercalc/gui/main_window.py:188
+#: powercalc/gui/main_window.py:191
 msgid "&Edit"
 msgstr ""
 
-#: powercalc/gui/main_window.py:194
+#: powercalc/gui/main_window.py:197
 msgid "&Angle Unit"
 msgstr ""
 
-#: powercalc/gui/main_window.py:197
+#: powercalc/gui/main_window.py:200
 msgid "&Radians"
 msgstr ""
 
-#: powercalc/gui/main_window.py:197
+#: powercalc/gui/main_window.py:200
 msgid "Angle unit: Radians."
 msgstr ""
 
-#: powercalc/gui/main_window.py:198
+#: powercalc/gui/main_window.py:201
 msgid "&Degrees"
 msgstr ""
 
-#: powercalc/gui/main_window.py:198
+#: powercalc/gui/main_window.py:201
 msgid "Angle unit: Degrees."
 msgstr ""
 
-#: powercalc/gui/main_window.py:199
+#: powercalc/gui/main_window.py:202
 msgid "&Gradians"
 msgstr ""
 
-#: powercalc/gui/main_window.py:199
+#: powercalc/gui/main_window.py:202
 msgid "Angle unit: Gradians."
 msgstr ""
 
-#: powercalc/gui/main_window.py:204
+#: powercalc/gui/main_window.py:207
 msgid "&Decimal Separator"
 msgstr ""
 
-#: powercalc/gui/main_window.py:208
+#: powercalc/gui/main_window.py:211
 msgid "&Point (1.5; arguments use commas)"
 msgstr ""
 
-#: powercalc/gui/main_window.py:210
+#: powercalc/gui/main_window.py:213
 msgid "Decimal separator: Point."
 msgstr ""
 
-#: powercalc/gui/main_window.py:213
+#: powercalc/gui/main_window.py:216
 msgid "&Comma (1,5; arguments use semicolons)"
 msgstr ""
 
-#: powercalc/gui/main_window.py:215
+#: powercalc/gui/main_window.py:218
 msgid "Decimal separator: Comma."
 msgstr ""
 
-#: powercalc/gui/main_window.py:221
+#: powercalc/gui/main_window.py:224
 msgid "&Number Domain"
 msgstr ""
 
-#: powercalc/gui/main_window.py:224
+#: powercalc/gui/main_window.py:227
 msgid "&Complex"
 msgstr ""
 
-#: powercalc/gui/main_window.py:224
+#: powercalc/gui/main_window.py:227
 msgid "Number domain: Complex."
 msgstr ""
 
-#: powercalc/gui/main_window.py:225
+#: powercalc/gui/main_window.py:228
 msgid "&Real Only"
 msgstr ""
 
-#: powercalc/gui/main_window.py:225
+#: powercalc/gui/main_window.py:228
 msgid "Number domain: Real only."
 msgstr ""
 
-#: powercalc/gui/main_window.py:230
+#: powercalc/gui/main_window.py:233
 msgid "&Logarithm Mode"
 msgstr ""
 
-#: powercalc/gui/main_window.py:233
+#: powercalc/gui/main_window.py:236
 msgid "&Base 10"
 msgstr ""
 
-#: powercalc/gui/main_window.py:233
+#: powercalc/gui/main_window.py:236
 msgid "Logarithm mode: Base 10."
 msgstr ""
 
-#: powercalc/gui/main_window.py:234
+#: powercalc/gui/main_window.py:237
 msgid "&Natural"
 msgstr ""
 
-#: powercalc/gui/main_window.py:234
+#: powercalc/gui/main_window.py:237
 msgid "Logarithm mode: Natural."
 msgstr ""
 
-#: powercalc/gui/main_window.py:239
+#: powercalc/gui/main_window.py:242
 msgid "&Language"
 msgstr ""
 
-#: powercalc/gui/main_window.py:243
+#: powercalc/gui/main_window.py:246
 msgid "&System"
 msgstr ""
 
-#: powercalc/gui/main_window.py:246
+#: powercalc/gui/main_window.py:249
 msgid "Language set to System. Restart Powercalc for the change to take effect."
 msgstr ""
 
-#: powercalc/gui/main_window.py:254
+#: powercalc/gui/main_window.py:257
 msgid "Language set to English. Restart Powercalc for the change to take effect."
 msgstr ""
 
-#: powercalc/gui/main_window.py:262
+#: powercalc/gui/main_window.py:265
 msgid "Language set to Deutsch. Restart Powercalc for the change to take effect."
 msgstr ""
 
-#: powercalc/gui/main_window.py:271
+#: powercalc/gui/main_window.py:274
 msgid "Decimal &Precision..."
 msgstr ""
 
-#: powercalc/gui/main_window.py:272
+#: powercalc/gui/main_window.py:275
 msgid "Set significant decimal digits"
 msgstr ""
 
-#: powercalc/gui/main_window.py:276
+#: powercalc/gui/main_window.py:279
 msgid "Play &Sound on Calculation Errors"
 msgstr ""
 
-#: powercalc/gui/main_window.py:277
+#: powercalc/gui/main_window.py:280
 msgid "Play a system sound when a calculation fails"
 msgstr ""
 
-#: powercalc/gui/main_window.py:282
+#: powercalc/gui/main_window.py:285
 msgid "&Restore Defaults..."
 msgstr ""
 
-#: powercalc/gui/main_window.py:283
+#: powercalc/gui/main_window.py:286
 msgid "Restore all calculation options to their defaults"
 msgstr ""
 
-#: powercalc/gui/main_window.py:292
+#: powercalc/gui/main_window.py:295
 msgid "&Options"
 msgstr ""
 
-#: powercalc/gui/main_window.py:298
+#: powercalc/gui/main_window.py:301
 msgid "&Keyboard Commands\tF1"
 msgstr ""
 
-#: powercalc/gui/main_window.py:299
+#: powercalc/gui/main_window.py:302
 msgid "Show keyboard commands"
 msgstr ""
 
-#: powercalc/gui/main_window.py:303
+#: powercalc/gui/main_window.py:306
 msgid "&About Powercalc"
 msgstr ""
 
-#: powercalc/gui/main_window.py:304
+#: powercalc/gui/main_window.py:307
 msgid "Show Powercalc version information"
 msgstr ""
 
-#: powercalc/gui/main_window.py:308
+#: powercalc/gui/main_window.py:311
 msgid "&Help"
 msgstr ""
 
-#: powercalc/gui/main_window.py:345
+#: powercalc/gui/main_window.py:348
 #, python-brace-format
 msgid "Decimal &Precision... ({precision})"
 msgstr ""
 
-#: powercalc/gui/main_window.py:359
+#: powercalc/gui/main_window.py:362
 msgid "Expression"
 msgstr ""
 
-#: powercalc/gui/main_window.py:364
+#: powercalc/gui/main_window.py:367
 msgid "Expression input"
 msgstr ""
 
-#: powercalc/gui/main_window.py:367 powercalc/gui/main_window.py:368
+#: powercalc/gui/main_window.py:370 powercalc/gui/main_window.py:371
 msgid "Calculate"
 msgstr ""
 
-#: powercalc/gui/main_window.py:378
+#: powercalc/gui/main_window.py:381
 msgid "Result"
 msgstr ""
 
-#: powercalc/gui/main_window.py:380
+#: powercalc/gui/main_window.py:383
 msgid "Result output"
 msgstr ""
 
-#: powercalc/gui/main_window.py:414
+#: powercalc/gui/main_window.py:417
 msgid "Calculation complete."
 msgstr ""
 
-#: powercalc/gui/main_window.py:418
+#: powercalc/gui/main_window.py:421
 msgid "Calculation failed."
 msgstr ""
 
-#: powercalc/gui/main_window.py:456
+#: powercalc/gui/main_window.py:459
 msgid "Language Changed"
 msgstr ""
 
-#: powercalc/gui/main_window.py:485
+#: powercalc/gui/main_window.py:488
 #, python-brace-format
 msgid "Decimal precision: {precision}."
 msgstr ""
 
-#: powercalc/gui/main_window.py:496
+#: powercalc/gui/main_window.py:499
 msgid "on"
 msgstr ""
 
-#: powercalc/gui/main_window.py:496
+#: powercalc/gui/main_window.py:499
 msgid "off"
 msgstr ""
 
-#: powercalc/gui/main_window.py:497
+#: powercalc/gui/main_window.py:500
 #, python-brace-format
 msgid "Error sound: {state}."
 msgstr ""
 
-#: powercalc/gui/main_window.py:503
+#: powercalc/gui/main_window.py:506
 msgid "Restore all calculation options to their default values?"
 msgstr ""
 
-#: powercalc/gui/main_window.py:504
+#: powercalc/gui/main_window.py:507
 msgid "Restore Defaults"
 msgstr ""
 
-#: powercalc/gui/main_window.py:515
+#: powercalc/gui/main_window.py:518
 msgid "Default options restored."
 msgstr ""
 
-#: powercalc/gui/main_window.py:524
+#: powercalc/gui/main_window.py:527
 msgid "The options are active for this session but could not be saved."
 msgstr ""
 
-#: powercalc/gui/main_window.py:538
+#: powercalc/gui/main_window.py:541
 msgid "Powercalc Settings"
 msgstr ""
 
-#: powercalc/gui/main_window.py:549
+#: powercalc/gui/main_window.py:552
 msgid "Input cleared."
 msgstr ""
 
-#: powercalc/gui/main_window.py:555
+#: powercalc/gui/main_window.py:558
 msgid "No result to copy."
 msgstr ""
 
-#: powercalc/gui/main_window.py:560
+#: powercalc/gui/main_window.py:563
 msgid "Clipboard is not available."
 msgstr ""
 
-#: powercalc/gui/main_window.py:566
+#: powercalc/gui/main_window.py:569
 msgid "Result copied."
 msgstr ""
 
-#: powercalc/gui/main_window.py:610
+#: powercalc/gui/main_window.py:613
 msgid "SVG files (*.svg)|*.svg"
 msgstr ""
 
-#: powercalc/gui/main_window.py:612
+#: powercalc/gui/main_window.py:615
 msgid "PNG files (*.png)|*.png"
 msgstr ""
 
-#: powercalc/gui/main_window.py:617
+#: powercalc/gui/main_window.py:620
 msgid "Save tactile plot"
 msgstr ""
 
-#: powercalc/gui/main_window.py:640
+#: powercalc/gui/main_window.py:650
 #, python-brace-format
 msgid "Tactile {format} exported: {name}"
 msgstr ""
 
-#: powercalc/gui/main_window.py:651
+#: powercalc/gui/main_window.py:661
 msgid "Tactile plot export"
 msgstr ""
 
-#: powercalc/gui/main_window.py:673
+#: powercalc/gui/main_window.py:683
 #, python-brace-format
 msgid "Inserted {name}."
 msgstr ""
 
-#: powercalc/gui/main_window.py:680
+#: powercalc/gui/main_window.py:690
 msgid "Keyboard Commands"
 msgstr ""
 
-#: powercalc/gui/main_window.py:693
+#: powercalc/gui/main_window.py:703
 #, python-brace-format
 msgid ""
 "Powercalc {version}\n"
@@ -526,130 +526,142 @@ msgid ""
 "Updates are available from GitHub Releases."
 msgstr ""
 
-#: powercalc/gui/main_window.py:697
+#: powercalc/gui/main_window.py:707
 msgid "About Powercalc"
 msgstr ""
 
-#: powercalc/gui/tactile_plot_dialog.py:18
+#: powercalc/gui/tactile_plot_dialog.py:21
 msgid "Swell paper"
 msgstr ""
 
-#: powercalc/gui/tactile_plot_dialog.py:19
+#: powercalc/gui/tactile_plot_dialog.py:22
 msgid "Embosser"
 msgstr ""
 
-#: powercalc/gui/tactile_plot_dialog.py:22
+#: powercalc/gui/tactile_plot_dialog.py:25
 msgid "A4 landscape"
 msgstr ""
 
-#: powercalc/gui/tactile_plot_dialog.py:23
+#: powercalc/gui/tactile_plot_dialog.py:26
 msgid "A4 portrait"
 msgstr ""
 
-#: powercalc/gui/tactile_plot_dialog.py:24
+#: powercalc/gui/tactile_plot_dialog.py:27
 msgid "A5 landscape"
 msgstr ""
 
-#: powercalc/gui/tactile_plot_dialog.py:25
+#: powercalc/gui/tactile_plot_dialog.py:28
 msgid "A5 portrait"
 msgstr ""
 
-#: powercalc/gui/tactile_plot_dialog.py:37
+#: powercalc/gui/tactile_plot_dialog.py:49
+#, python-brace-format
+msgid "The selected format will save to {path}. Replace this existing file?"
+msgstr ""
+
+#: powercalc/gui/tactile_plot_dialog.py:52
+msgid "Replace tactile plot?"
+msgstr ""
+
+#: powercalc/gui/tactile_plot_dialog.py:65
 msgid "Export tactile function plot"
 msgstr ""
 
-#: powercalc/gui/tactile_plot_dialog.py:42
+#: powercalc/gui/tactile_plot_dialog.py:70
 msgid ""
 "Export real-valued functions of x as a tactile graphic. The content "
 "profile and file format are selected separately."
 msgstr ""
 
-#: powercalc/gui/tactile_plot_dialog.py:55
+#: powercalc/gui/tactile_plot_dialog.py:83
 msgid "Function of x"
 msgstr ""
 
-#: powercalc/gui/tactile_plot_dialog.py:58
+#: powercalc/gui/tactile_plot_dialog.py:86
 msgid "Function 1 legend label"
 msgstr ""
 
-#: powercalc/gui/tactile_plot_dialog.py:80
-#: powercalc/gui/tactile_plot_dialog.py:81
+#: powercalc/gui/tactile_plot_dialog.py:107
+#: powercalc/gui/tactile_plot_dialog.py:108
 msgid "Add function"
 msgstr ""
 
-#: powercalc/gui/tactile_plot_dialog.py:90
+#: powercalc/gui/tactile_plot_dialog.py:117
 msgid "X minimum"
 msgstr ""
 
-#: powercalc/gui/tactile_plot_dialog.py:91
+#: powercalc/gui/tactile_plot_dialog.py:118
 msgid "X maximum"
 msgstr ""
 
-#: powercalc/gui/tactile_plot_dialog.py:93
+#: powercalc/gui/tactile_plot_dialog.py:120
 msgid "Title"
 msgstr ""
 
-#: powercalc/gui/tactile_plot_dialog.py:93
+#: powercalc/gui/tactile_plot_dialog.py:120
 msgid "Tactile function plot"
 msgstr ""
 
-#: powercalc/gui/tactile_plot_dialog.py:96
+#: powercalc/gui/tactile_plot_dialog.py:123
 msgid "Content profile"
 msgstr ""
 
-#: powercalc/gui/tactile_plot_dialog.py:99
+#: powercalc/gui/tactile_plot_dialog.py:126
 msgid "Paper size"
 msgstr ""
 
-#: powercalc/gui/tactile_plot_dialog.py:102
+#: powercalc/gui/tactile_plot_dialog.py:129
 msgid "File format"
 msgstr ""
 
-#: powercalc/gui/tactile_plot_dialog.py:109
-#: powercalc/gui/tactile_plot_dialog.py:110
+#: powercalc/gui/tactile_plot_dialog.py:136
+#: powercalc/gui/tactile_plot_dialog.py:137
 msgid "Braille labels"
 msgstr ""
 
-#: powercalc/gui/tactile_plot_dialog.py:113
+#: powercalc/gui/tactile_plot_dialog.py:140
 msgid "Use bundled Liblouis for German Grade 1 Braille labels."
 msgstr ""
 
-#: powercalc/gui/tactile_plot_dialog.py:120
+#: powercalc/gui/tactile_plot_dialog.py:147
 msgid ""
 "Braille labels are unavailable because this installation does not include"
 " the Liblouis runtime."
 msgstr ""
 
-#: powercalc/gui/tactile_plot_dialog.py:126
+#: powercalc/gui/tactile_plot_dialog.py:153
 msgid ""
 "Braille labels require the bundled Liblouis runtime and are unavailable "
 "in this installation."
 msgstr ""
 
-#: powercalc/gui/tactile_plot_dialog.py:143
+#: powercalc/gui/tactile_plot_dialog.py:170
 msgid "Save plot…"
 msgstr ""
 
-#: powercalc/gui/tactile_plot_dialog.py:144
+#: powercalc/gui/tactile_plot_dialog.py:171
 msgid "Cancel"
 msgstr ""
 
-#: powercalc/gui/tactile_plot_dialog.py:169
+#: powercalc/gui/tactile_plot_dialog.py:197
+#: powercalc/gui/tactile_plot_dialog.py:253
 #, python-brace-format
 msgid "Function {number} of x"
 msgstr ""
 
-#: powercalc/gui/tactile_plot_dialog.py:170
+#: powercalc/gui/tactile_plot_dialog.py:198
+#: powercalc/gui/tactile_plot_dialog.py:254
 #, python-brace-format
 msgid "Function {number} legend label"
 msgstr ""
 
-#: powercalc/gui/tactile_plot_dialog.py:190
+#: powercalc/gui/tactile_plot_dialog.py:217
+#: powercalc/gui/tactile_plot_dialog.py:266
 #, python-brace-format
 msgid "Remove function {number}"
 msgstr ""
 
-#: powercalc/gui/tactile_plot_dialog.py:255
+#: powercalc/gui/tactile_plot_dialog.py:310
 msgid "X minimum and maximum must be numbers."
 msgstr ""
 
