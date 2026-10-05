@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Powercalc VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-10-05 14:11+0000\n"
+"POT-Creation-Date: 2026-10-05 14:21+0000\n"
 "PO-Revision-Date: 2026-08-14 10:56+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: de\n"
@@ -183,7 +183,8 @@ msgstr ""
 "Strg+L: Ausdruckseingabe löschen.\n"
 "Strg+C in der Ergebnisausgabe: Ausgewähltes Ergebnis kopieren.\n"
 "Strg+Umschalt+X: Funktions- und Konstantenindex öffnen.\n"
-"Der Index öffnet sich mit Fokus auf der Liste; einen Buchstaben eingeben,\n"
+"Der Index öffnet sich mit Fokus auf der Liste; einen Buchstaben eingeben,"
+"\n"
 "um zu springen, oder die Pfeiltasten und die Eingabetaste verwenden. Tab\n"
 "erreicht ein Suchfeld, das nach Teilzeichenfolge filtert. Escape\n"
 "schließt, ohne einzufügen. Beim Einfügen wird das erste Argument\n"
@@ -360,20 +361,20 @@ msgstr "&System"
 #: powercalc/gui/main_window.py:246
 msgid "Language set to System. Restart Powercalc for the change to take effect."
 msgstr ""
-"Sprache auf System gestellt. Powercalc muss neu gestartet werden, damit die "
-"Änderung wirksam wird."
+"Sprache auf System gestellt. Powercalc muss neu gestartet werden, damit "
+"die Änderung wirksam wird."
 
 #: powercalc/gui/main_window.py:254
 msgid "Language set to English. Restart Powercalc for the change to take effect."
 msgstr ""
-"Sprache auf English gestellt. Powercalc muss neu gestartet werden, damit die"
-" Änderung wirksam wird."
+"Sprache auf English gestellt. Powercalc muss neu gestartet werden, damit "
+"die Änderung wirksam wird."
 
 #: powercalc/gui/main_window.py:262
 msgid "Language set to Deutsch. Restart Powercalc for the change to take effect."
 msgstr ""
-"Sprache auf Deutsch gestellt. Powercalc muss neu gestartet werden, damit die"
-" Änderung wirksam wird."
+"Sprache auf Deutsch gestellt. Powercalc muss neu gestartet werden, damit "
+"die Änderung wirksam wird."
 
 #: powercalc/gui/main_window.py:271
 msgid "Decimal &Precision..."
@@ -493,8 +494,8 @@ msgstr "Standardoptionen wiederhergestellt."
 #: powercalc/gui/main_window.py:524
 msgid "The options are active for this session but could not be saved."
 msgstr ""
-"Die Optionen sind für diese Sitzung aktiv, konnten aber nicht gespeichert "
-"werden."
+"Die Optionen sind für diese Sitzung aktiv, konnten aber nicht gespeichert"
+" werden."
 
 #: powercalc/gui/main_window.py:538
 msgid "Powercalc Settings"
@@ -593,11 +594,11 @@ msgstr "Taktile Funktionsgrafik exportieren"
 
 #: powercalc/gui/tactile_plot_dialog.py:42
 msgid ""
-"Export real-valued functions of x as a tactile graphic. The content profile "
-"and file format are selected separately."
+"Export real-valued functions of x as a tactile graphic. The content "
+"profile and file format are selected separately."
 msgstr ""
-"Reellwertige Funktionen von x als taktile Grafik exportieren. Inhaltsprofil "
-"und Dateiformat werden unabhängig gewählt."
+"Reellwertige Funktionen von x als taktile Grafik exportieren. "
+"Inhaltsprofil und Dateiformat werden unabhängig gewählt."
 
 #: powercalc/gui/tactile_plot_dialog.py:55
 msgid "Function of x"
@@ -607,88 +608,90 @@ msgstr "Funktion von x"
 msgid "Function 1 legend label"
 msgstr "Legendenbeschriftung für Funktion 1"
 
-#: powercalc/gui/tactile_plot_dialog.py:60
-msgid "X minimum"
-msgstr "X-Minimum"
-
-#: powercalc/gui/tactile_plot_dialog.py:61
-msgid "X maximum"
-msgstr "X-Maximum"
-
-#: powercalc/gui/tactile_plot_dialog.py:63
-msgid "Title"
-msgstr "Titel"
-
-#: powercalc/gui/tactile_plot_dialog.py:63
-msgid "Tactile function plot"
-msgstr "Taktile Funktionsgrafik"
-
-#: powercalc/gui/tactile_plot_dialog.py:66
-msgid "Content profile"
-msgstr "Inhaltsprofil"
-
-#: powercalc/gui/tactile_plot_dialog.py:69
-msgid "Paper size"
-msgstr "Papierformat"
-
-#: powercalc/gui/tactile_plot_dialog.py:72
-msgid "File format"
-msgstr "Dateiformat"
-
-#: powercalc/gui/tactile_plot_dialog.py:88 powercalc/gui/tactile_plot_dialog.py:89
+#: powercalc/gui/tactile_plot_dialog.py:80
+#: powercalc/gui/tactile_plot_dialog.py:81
 msgid "Add function"
 msgstr "Funktion hinzufügen"
 
-#: powercalc/gui/tactile_plot_dialog.py:96 powercalc/gui/tactile_plot_dialog.py:97
+#: powercalc/gui/tactile_plot_dialog.py:90
+msgid "X minimum"
+msgstr "X-Minimum"
+
+#: powercalc/gui/tactile_plot_dialog.py:91
+msgid "X maximum"
+msgstr "X-Maximum"
+
+#: powercalc/gui/tactile_plot_dialog.py:93
+msgid "Title"
+msgstr "Titel"
+
+#: powercalc/gui/tactile_plot_dialog.py:93
+msgid "Tactile function plot"
+msgstr "Taktile Funktionsgrafik"
+
+#: powercalc/gui/tactile_plot_dialog.py:96
+msgid "Content profile"
+msgstr "Inhaltsprofil"
+
+#: powercalc/gui/tactile_plot_dialog.py:99
+msgid "Paper size"
+msgstr "Papierformat"
+
+#: powercalc/gui/tactile_plot_dialog.py:102
+msgid "File format"
+msgstr "Dateiformat"
+
+#: powercalc/gui/tactile_plot_dialog.py:109
+#: powercalc/gui/tactile_plot_dialog.py:110
 msgid "Braille labels"
 msgstr "Braille-Beschriftungen"
 
-#: powercalc/gui/tactile_plot_dialog.py:100
+#: powercalc/gui/tactile_plot_dialog.py:113
 msgid "Use bundled Liblouis for German Grade 1 Braille labels."
 msgstr ""
-"Mitgeliefertes Liblouis für deutsche Braille-Beschriftungen in Vollschrift "
-"verwenden."
+"Mitgeliefertes Liblouis für deutsche Braille-Beschriftungen in "
+"Vollschrift verwenden."
 
-#: powercalc/gui/tactile_plot_dialog.py:107
+#: powercalc/gui/tactile_plot_dialog.py:120
 msgid ""
-"Braille labels are unavailable because this installation does not include "
-"the Liblouis runtime."
+"Braille labels are unavailable because this installation does not include"
+" the Liblouis runtime."
 msgstr ""
 "Braille-Beschriftungen sind nicht verfügbar, weil diese Installation "
 "Liblouis nicht enthält."
 
-#: powercalc/gui/tactile_plot_dialog.py:113
+#: powercalc/gui/tactile_plot_dialog.py:126
 msgid ""
-"Braille labels require the bundled Liblouis runtime and are unavailable in "
-"this installation."
+"Braille labels require the bundled Liblouis runtime and are unavailable "
+"in this installation."
 msgstr ""
 "Braille-Beschriftungen benötigen das mitgelieferte Liblouis und sind in "
 "dieser Installation nicht verfügbar."
 
-#: powercalc/gui/tactile_plot_dialog.py:130
+#: powercalc/gui/tactile_plot_dialog.py:143
 msgid "Save plot…"
 msgstr "Grafik speichern…"
 
-#: powercalc/gui/tactile_plot_dialog.py:131
+#: powercalc/gui/tactile_plot_dialog.py:144
 msgid "Cancel"
 msgstr "Abbrechen"
 
-#: powercalc/gui/tactile_plot_dialog.py:156
+#: powercalc/gui/tactile_plot_dialog.py:169
 #, python-brace-format
 msgid "Function {number} of x"
 msgstr "Funktion {number} von x"
 
-#: powercalc/gui/tactile_plot_dialog.py:157
+#: powercalc/gui/tactile_plot_dialog.py:170
 #, python-brace-format
 msgid "Function {number} legend label"
 msgstr "Legendenbeschriftung für Funktion {number}"
 
-#: powercalc/gui/tactile_plot_dialog.py:177
+#: powercalc/gui/tactile_plot_dialog.py:190
 #, python-brace-format
 msgid "Remove function {number}"
 msgstr "Funktion {number} entfernen"
 
-#: powercalc/gui/tactile_plot_dialog.py:236
+#: powercalc/gui/tactile_plot_dialog.py:255
 msgid "X minimum and maximum must be numbers."
 msgstr "X-Minimum und X-Maximum müssen Zahlen sein."
 

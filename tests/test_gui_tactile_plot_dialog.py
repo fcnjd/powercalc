@@ -49,6 +49,13 @@ def test_dialog_adds_and_removes_labelled_function_rows():
 	dialog = TactilePlotDialog(None, "x")
 	try:
 		assert dialog.add_function_button.GetLabel() == "Add function"
+		children = list(dialog.GetChildren())
+		assert children.index(dialog.additional_panel) < children.index(
+			dialog.x_min_input
+		)
+		assert children.index(dialog.add_function_button) < children.index(
+			dialog.x_min_input
+		)
 		dialog._on_add_function(wx.CommandEvent())
 		row, expression, legend = dialog.additional_rows[0]
 		assert expression.GetName() == "Function 2 of x"

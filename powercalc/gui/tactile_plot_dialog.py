@@ -57,23 +57,9 @@ class TactilePlotDialog(wx.Dialog):
 		self.first_label_input = self._add_text_field(
 			grid, _("Function 1 legend label"), ""
 		)
-		self.x_min_input = self._add_text_field(grid, _("X minimum"), "-10")
-		self.x_max_input = self._add_text_field(grid, _("X maximum"), "10")
-		self.title_input = self._add_text_field(
-			grid, _("Title"), _("Tactile function plot")
-		)
-		self.profile_choice = self._add_choice(
-			grid, _("Content profile"), _PROFILE_CHOICES
-		)
-		self.paper_size_choice = self._add_choice(
-			grid, _("Paper size"), _PAPER_SIZE_CHOICES
-		)
-		self.file_format_choice = self._add_choice(
-			grid, _("File format"), _FORMAT_CHOICES
-		)
 		main_sizer.Add(
 			grid,
-			wx.SizerFlags(1).Expand().Border(wx.LEFT | wx.RIGHT, 12),
+			wx.SizerFlags(0).Expand().Border(wx.LEFT | wx.RIGHT, 12),
 		)
 
 		self.additional_rows: list[
@@ -97,6 +83,27 @@ class TactilePlotDialog(wx.Dialog):
 		main_sizer.Add(
 			self.add_function_button,
 			wx.SizerFlags(0).Border(wx.LEFT | wx.RIGHT | wx.TOP, 12),
+		)
+
+		grid = wx.FlexGridSizer(cols=2, hgap=8, vgap=8)
+		grid.AddGrowableCol(1, 1)
+		self.x_min_input = self._add_text_field(grid, _("X minimum"), "-10")
+		self.x_max_input = self._add_text_field(grid, _("X maximum"), "10")
+		self.title_input = self._add_text_field(
+			grid, _("Title"), _("Tactile function plot")
+		)
+		self.profile_choice = self._add_choice(
+			grid, _("Content profile"), _PROFILE_CHOICES
+		)
+		self.paper_size_choice = self._add_choice(
+			grid, _("Paper size"), _PAPER_SIZE_CHOICES
+		)
+		self.file_format_choice = self._add_choice(
+			grid, _("File format"), _FORMAT_CHOICES
+		)
+		main_sizer.Add(
+			grid,
+			wx.SizerFlags(0).Expand().Border(wx.LEFT | wx.RIGHT, 12),
 		)
 
 		self.braille_labels = wx.CheckBox(self, label=_("Braille labels"))
