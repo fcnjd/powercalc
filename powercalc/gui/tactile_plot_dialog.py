@@ -12,6 +12,7 @@ from powercalc.core.tactile_plot import (
 	PlotFileFormat,
 	PlotFunction,
 	MAX_FUNCTIONS,
+	function_name,
 	TactilePlotRequest,
 	braille_labels_available,
 	plot_output_path,
@@ -67,7 +68,8 @@ class TactilePlotDialog(wx.Dialog):
 		intro = wx.StaticText(
 			self,
 			label=_(
-				"Export real-valued functions of x as a tactile graphic. "
+				"Export up to six real-valued functions of x as a "
+				"tactile graphic. "
 				"The content profile and file format are selected separately."
 			),
 		)
@@ -80,10 +82,12 @@ class TactilePlotDialog(wx.Dialog):
 		grid = wx.FlexGridSizer(cols=2, hgap=8, vgap=8)
 		grid.AddGrowableCol(1, 1)
 		self.expression_input = self._add_text_field(
-			grid, _("Function of x"), expression or "x^2"
+			grid, function_name(1), expression or "x^2"
 		)
 		self.first_label_input = self._add_text_field(
-			grid, _("Function 1 legend label"), ""
+			grid,
+			_("Legend label for {function}").format(function=function_name(1)),
+			"",
 		)
 		main_sizer.Add(
 			grid,
@@ -189,13 +193,17 @@ class TactilePlotDialog(wx.Dialog):
 	def _on_add_function(self, event: wx.Event) -> None:
 		"""Add an accessible expression/legend pair below the first function."""
 
+		if len(self.additional_rows) + 1 >= MAX_FUNCTIONS:
+			return
 		index = len(self.additional_rows) + 2
 		row = wx.Panel(self.additional_panel)
 		row_sizer = wx.BoxSizer(wx.VERTICAL)
 		fields = wx.FlexGridSizer(cols=2, hgap=8, vgap=5)
 		fields.AddGrowableCol(1, 1)
-		expression_label = _("Function {number} of x").format(number=index)
-		legend_label = _("Function {number} legend label").format(number=index)
+		expression_label = function_name(index)
+		legend_label = _("Legend label for {function}").format(
+			function=function_name(index)
+		)
 		fields.Add(
 			wx.StaticText(row, label=expression_label),
 			0,
@@ -214,7 +222,8 @@ class TactilePlotDialog(wx.Dialog):
 		fields.Add(legend, 1, wx.EXPAND)
 		row_sizer.Add(fields, 0, wx.EXPAND)
 		remove_button = wx.Button(
-			row, label=_("Remove function {number}").format(number=index)
+			row,
+			label=_("Remove {function}").format(function=function_name(index)),
 		)
 		remove_button.Bind(wx.EVT_BUTTON, lambda unused: self._remove_row(row))
 		row_sizer.Add(remove_button, 0, wx.ALIGN_RIGHT | wx.TOP, 4)
@@ -250,9 +259,9 @@ class TactilePlotDialog(wx.Dialog):
 				for child in row.GetChildren()
 				if isinstance(child, wx.StaticText)
 			]
-			expression_label = _("Function {number} of x").format(number=number)
-			legend_label = _("Function {number} legend label").format(
-				number=number
+			expression_label = function_name(number)
+			legend_label = _("Legend label for {function}").format(
+				function=function_name(number)
 			)
 			labels[0].SetLabel(expression_label)
 			labels[1].SetLabel(legend_label)
@@ -263,7 +272,9 @@ class TactilePlotDialog(wx.Dialog):
 				for child in row.GetChildren()
 				if isinstance(child, wx.Button)
 			)
-			button.SetLabel(_("Remove function {number}").format(number=number))
+			button.SetLabel(
+				_("Remove {function}").format(function=function_name(number))
+			)
 
 	def _resize_additional_rows(self) -> None:
 		self.additional_panel.FitInside()

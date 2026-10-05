@@ -25,7 +25,7 @@ line styles, or claims of universal printer/paper compatibility.
 
 | Source evidence | Requirement | UI / non-goal | Verification |
 | --- | --- | --- | --- |
-| Supplied notebook: `create_plot` and `add_plot` share axes, use a legend, and cycle line/marker styles. | Up to six independently parsed functions with optional legend names; monochrome styles distinguish curves by touch for either profile. | Add/remove function rows and legend labels; no custom style picker. | Multi-function export, legend/style and dialog tests. |
+| Supplied notebook: `create_plot` and `add_plot` share axes, use a legend, and cycle line/marker styles. | Up to six independently parsed functions (a Powercalc readability/style limit, not a notebook maximum) with optional legend names; monochrome styles distinguish curves by touch for either profile. | Add/remove function rows and legend labels; no custom style picker. | Multi-function export, legend/style and dialog tests. |
 | Supplied notebook: `use_swell_paper_styles`, black line/marker styles. | Monochrome, high-contrast `Swell paper` encoding. | Profile choice; no custom-style picker. | Profile export test and UI check. |
 | Notebook distinguishes swell-paper styling from other output. | `Embosser` is a separate content profile, not a device protocol. | Profile choice; no direct printing. | Profile export test. |
 | Notebook: `use_braille`. | Explicit opt-in labels only through verified Liblouis translation. | `Braille labels` checkbox; disabled with explanation when runtime is missing. | Translator and export tests; Windows smoke test. |
@@ -40,10 +40,13 @@ Dialog title: `Export tactile function plot`.
 
 Tab order and defaults:
 
-1. `Function of x` — current calculator input, otherwise `x^2`; optional
-   `Function 1 legend label` defaults to the expression.
-2. `Add function` inserts labelled expression and optional legend-label fields
-   (up to six functions total), each with a `Remove function N` action.
+1. `f(x)` — current calculator input, otherwise `x^2`; optional
+   `Legend label for f(x)` defaults to `f(x)` when empty.
+2. `Add function` inserts expression fields `g(x)` through `k(x)` and optional
+   legend-label fields. Each row has `Remove g(x)` etc.; removing a row
+   renames later rows in sequence. The button disables at six total functions.
+   Blank legend labels export as the corresponding `f(x)`–`k(x)` name; custom
+   legend labels remain supported.
 3. `X minimum` — `-10`.
 4. `X maximum` — `10`.
 5. `Title` — `Tactile function plot`.
@@ -60,6 +63,11 @@ Tab order and defaults:
 Success appears in the status bar with exact filename and format. Validation
 and export failures use readable text through the existing error path.
 
+The notebook uses `itertools.cycle(self._tactile_styles)` with six style
+dictionaries; `add_plot` consumes the next style and has no count check. Its
+examples plot two functions. Powercalc caps the count at six so each curve has
+a distinct profile style and the legend remains manageable on A5/A4.
+
 ## Technical constraints
 
 - wxPython stays in `gui`; parsing, profile data, dimensions, Braille boundary,
@@ -74,13 +82,14 @@ and export failures use readable text through the existing error path.
 
 ## Acceptance criteria
 
-1. Two or more named functions export on shared axes with a legend; each uses
+1. Two to six named functions export on shared axes with a legend; each uses
    a different tactile style for either selectable monochrome profile.
 2. Either profile exports SVG and PNG with matching suffix/filter/type;
    overwrite confirmation applies to the actual normalized output filename.
 3. The four paper sizes are selectable, with A4 landscape default and tested
    physical dimensions.
-4. Dialog labels, defaults, tab order and actions match this contract.
+4. Dialog labels, defaults, tab order and actions match this contract; the
+   core rejects a seventh function even when called without the dialog.
 5. Invalid bounds, expressions, modes and unwritable paths are readable
    failures without a partial success claim.
 6. Unsafe expressions remain rejected by the restricted parser.

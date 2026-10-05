@@ -18,7 +18,7 @@ def test_dialog_exposes_the_approved_v2_options_and_actions():
 	try:
 		request = dialog.get_request()
 		assert dialog.GetTitle() == "Export tactile function plot"
-		assert dialog.expression_input.GetName() == "Function of x"
+		assert dialog.expression_input.GetName() == "f(x)"
 		assert dialog.x_min_input.GetName() == "X minimum"
 		assert dialog.x_max_input.GetName() == "X maximum"
 		assert dialog.title_input.GetName() == "Title"
@@ -58,8 +58,8 @@ def test_dialog_adds_and_removes_labelled_function_rows():
 		)
 		dialog._on_add_function(wx.CommandEvent())
 		row, expression, legend = dialog.additional_rows[0]
-		assert expression.GetName() == "Function 2 of x"
-		assert legend.GetName() == "Function 2 legend label"
+		assert expression.GetName() == "g(x)"
+		assert legend.GetName() == "Legend label for g(x)"
 		expression.SetValue("x^2")
 		legend.SetValue("Square")
 		request = dialog.get_request()
@@ -81,6 +81,8 @@ def test_dialog_bounds_function_rows_and_keeps_them_scrollable():
 		for _ in range(5):
 			dialog._on_add_function(wx.CommandEvent())
 		assert len(dialog.get_request().additional_functions) == 5
+		dialog._on_add_function(wx.CommandEvent())
+		assert len(dialog.additional_rows) == 5
 		assert not dialog.add_function_button.IsEnabled()
 		assert dialog.GetSize().height <= 720
 		assert dialog.additional_panel.HasScrollbar(wx.VERTICAL)
@@ -99,23 +101,29 @@ def test_remove_and_readd_keeps_accessible_function_numbers_in_sync():
 			dialog._on_add_function(wx.CommandEvent())
 		dialog._remove_row(dialog.additional_rows[0][0])
 		assert [field.GetName() for _, field, _ in dialog.additional_rows] == [
-			"Function 2 of x",
-			"Function 3 of x",
+			"g(x)",
+			"h(x)",
 		]
 		dialog._on_add_function(wx.CommandEvent())
 		assert [field.GetName() for _, field, _ in dialog.additional_rows] == [
-			"Function 2 of x",
-			"Function 3 of x",
-			"Function 4 of x",
+			"g(x)",
+			"h(x)",
+			"i(x)",
 		]
 		for number, (row, _, legend) in enumerate(dialog.additional_rows, 2):
-			assert legend.GetName() == f"Function {number} legend label"
+			assert (
+				legend.GetName()
+				== f"Legend label for {chr(ord('f') + number - 1)}(x)"
+			)
 			buttons = [
 				child
 				for child in row.GetChildren()
 				if isinstance(child, wx.Button)
 			]
-			assert buttons[0].GetLabel() == f"Remove function {number}"
+			assert (
+				buttons[0].GetLabel()
+				== f"Remove {chr(ord('f') + number - 1)}(x)"
+			)
 	finally:
 		dialog.Destroy()
 		app.Destroy()

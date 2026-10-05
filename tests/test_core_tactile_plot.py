@@ -172,7 +172,7 @@ def test_invalid_second_function_never_creates_output(tmp_path: Path):
 	request = TactilePlotRequest(
 		"x", additional_functions=(PlotFunction("__import__('os')", "Unsafe"),)
 	)
-	with pytest.raises(TactilePlotError, match="Function 2"):
+	with pytest.raises(TactilePlotError, match=r"g\(x\)"):
 		export_tactile_plot(request, tmp_path / "plot")
 	assert not list(tmp_path.iterdir())
 
@@ -195,3 +195,44 @@ def test_unwritable_parent_is_readable_error(tmp_path: Path):
 	with pytest.raises(TactilePlotError, match="Could not write plot"):
 		export_tactile_plot(TactilePlotRequest("x"), parent / "plot")
 	assert parent.read_text(encoding="utf-8") == "keep this file"
+
+
+def test_six_function_limit_and_default_labels(tmp_path: Path, monkeypatch):
+	from powercalc.core import tactile_plot
+
+	assert tactile_plot.MAX_FUNCTIONS == 6
+	assert [tactile_plot.function_name(index) for index in range(1, 7)] == [
+		"f(x)",
+		"g(x)",
+		"h(x)",
+		"i(x)",
+		"j(x)",
+		"k(x)",
+	]
+	captured = []
+	original = tactile_plot._save_figure
+
+	def inspect_figure(figure, path, file_format):
+		captured.append(figure.axes[0])
+		original(figure, path, file_format)
+
+	monkeypatch.setattr(tactile_plot, "_save_figure", inspect_figure)
+	request = TactilePlotRequest(
+		"x",
+		additional_functions=tuple(
+			tactile_plot.PlotFunction("x", "") for _ in range(5)
+		),
+	)
+	export_tactile_plot(request, tmp_path / "six")
+	assert [
+		item.get_text() for item in captured[0].get_legend().get_texts()
+	] == ["f(x)", "g(x)", "h(x)", "i(x)", "j(x)", "k(x)"]
+	too_many = TactilePlotRequest(
+		"x",
+		additional_functions=tuple(
+			tactile_plot.PlotFunction("x", "") for _ in range(6)
+		),
+	)
+	with pytest.raises(TactilePlotError, match="At most 6 functions"):
+		export_tactile_plot(too_many, tmp_path / "seven")
+	assert not (tmp_path / "seven.svg").exists()

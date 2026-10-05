@@ -476,7 +476,10 @@ Update this file when any of the following change:
 
 The tactile export request accepts a first expression plus up to five
 `PlotFunction` entries (six curves total). Each expression uses the restricted
-calculator parser independently. Empty legend names fall back to the expression.
+calculator parser independently. Fields and validation errors use `f(x)`
+through `k(x)`; empty legend names fall back to those names. The notebook
+cycles six styles without imposing a maximum, but the application caps
+functions at six to avoid repeated styles and crowded legends.
 Both profiles use monochrome, profile-specific dash/marker cycles; SVG versus
 PNG remains independent of the content profile. The native dialog provides
 Add/Remove function controls with labelled fields. See

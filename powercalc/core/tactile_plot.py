@@ -145,7 +145,15 @@ _SERIES_STYLES = {
 		("--", "v"),
 	),
 }
-MAX_FUNCTIONS = 6
+FUNCTION_NAMES = ("f", "g", "h", "i", "j", "k")
+MAX_FUNCTIONS = len(FUNCTION_NAMES)
+
+
+def function_name(index: int) -> str:
+	"""Return the stable mathematical label for a one-based curve index."""
+
+	return f"{FUNCTION_NAMES[index - 1]}(x)"
+
 
 _PAPER_SIZES_MM = {
 	PaperSize.A4_LANDSCAPE: (297.0, 210.0),
@@ -185,11 +193,12 @@ def export_tactile_plot(
 	validate_tactile_plot_request(request, options)
 	parsed = _parse_functions(request, options)
 	series = []
-	for variable, expression, legend in parsed:
+	for index, (variable, expression, legend) in enumerate(parsed, 1):
 		points = _sample_real_points(variable, expression, request)
 		if not any(y_value is not None for _, y_value in points):
 			raise TactilePlotError(
-				f"Function {legend} has no real, finite values in this x range."
+				f"{function_name(index)} has no real, finite values "
+				"in this x range."
 			)
 		series.append((points, legend))
 
@@ -291,9 +300,11 @@ def _parse_functions(
 			variable, expression = parse_function_expression(source, options)
 		except ExpressionError as exc:
 			raise TactilePlotError(
-				f"Function {index}: {exc.error.message}"
+				f"{function_name(index)}: {exc.error.message}"
 			) from exc
-		parsed.append((variable, expression, legend.strip() or source.strip()))
+		parsed.append(
+			(variable, expression, legend.strip() or function_name(index))
+		)
 	return parsed
 
 
