@@ -165,32 +165,33 @@ class TactilePlotDialog(wx.Dialog):
 		index = self._next_function_number
 		self._next_function_number += 1
 		row = wx.Panel(self.additional_panel)
-		row_sizer = wx.BoxSizer(wx.HORIZONTAL)
+		row_sizer = wx.BoxSizer(wx.VERTICAL)
+		fields = wx.FlexGridSizer(cols=2, hgap=8, vgap=5)
+		fields.AddGrowableCol(1, 1)
 		expression_label = _("Function {number} of x").format(number=index)
 		legend_label = _("Function {number} legend label").format(number=index)
-		row_sizer.Add(
+		fields.Add(
 			wx.StaticText(row, label=expression_label),
 			0,
-			wx.ALIGN_CENTER_VERTICAL | wx.RIGHT,
-			6,
+			wx.ALIGN_CENTER_VERTICAL,
 		)
 		expression = wx.TextCtrl(row)
 		expression.SetName(expression_label)
-		row_sizer.Add(expression, 1, wx.RIGHT, 8)
-		row_sizer.Add(
+		fields.Add(expression, 1, wx.EXPAND)
+		fields.Add(
 			wx.StaticText(row, label=legend_label),
 			0,
-			wx.ALIGN_CENTER_VERTICAL | wx.RIGHT,
-			6,
+			wx.ALIGN_CENTER_VERTICAL,
 		)
 		legend = wx.TextCtrl(row)
 		legend.SetName(legend_label)
-		row_sizer.Add(legend, 1, wx.RIGHT, 8)
+		fields.Add(legend, 1, wx.EXPAND)
+		row_sizer.Add(fields, 0, wx.EXPAND)
 		remove_button = wx.Button(
 			row, label=_("Remove function {number}").format(number=index)
 		)
 		remove_button.Bind(wx.EVT_BUTTON, lambda unused: self._remove_row(row))
-		row_sizer.Add(remove_button)
+		row_sizer.Add(remove_button, 0, wx.ALIGN_RIGHT | wx.TOP, 4)
 		row.SetSizer(row_sizer)
 		self.additional_sizer.Add(row, 0, wx.EXPAND | wx.TOP, 8)
 		self.additional_rows.append((row, expression, legend))
