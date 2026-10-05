@@ -10,6 +10,7 @@ from powercalc.core.braille import LiblouisBrailleTranslator
 from powercalc.core.tactile_plot import (
 	ContentProfile,
 	PlotFileFormat,
+	PlotFunction,
 	TactilePlotRequest,
 	export_tactile_plot,
 )
@@ -53,6 +54,8 @@ def main() -> int:
 		svg_path = export_tactile_plot(
 			TactilePlotRequest(
 				"x^2",
+				label="Square",
+				additional_functions=(PlotFunction("x", "Linear"),),
 				content_profile=ContentProfile.SWELL_PAPER,
 				use_braille_labels=True,
 			),
@@ -62,6 +65,8 @@ def main() -> int:
 		png_path = export_tactile_plot(
 			TactilePlotRequest(
 				"x^2",
+				label="Square",
+				additional_functions=(PlotFunction("x", "Linear"),),
 				content_profile=ContentProfile.EMBOSSER,
 				file_format=PlotFileFormat.PNG,
 			),
