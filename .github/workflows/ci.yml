@@ -29,7 +29,8 @@ jobs:
             libcairo2-dev \
             libgdk-pixbuf-2.0-dev \
             libatk1.0-dev \
-            libxtst-dev
+            libxtst-dev \
+            xvfb
 
       - name: Install dependencies
         run: uv sync --frozen
@@ -41,7 +42,7 @@ jobs:
         run: uv run --frozen ruff format --check .
 
       - name: Run pytest
-        run: uv run --frozen pytest
+        run: xvfb-run -a uv run --frozen pytest
 
       - name: Run import smoke check
         run: >
@@ -50,8 +51,8 @@ jobs:
           from powercalc.version import get_version;
           print(f'Powercalc {get_version()} import smoke check passed.')"
 
-  windows-liblouis-smoke:
-    name: Windows Liblouis portable smoke check
+  windows-tactile-plot-smoke:
+    name: Windows tactile plot portable smoke check
     runs-on: windows-latest
 
     steps:
@@ -69,7 +70,7 @@ jobs:
       - name: Build Windows portable artifact
         run: uv run --frozen python -m tools.build portable
 
-      - name: Smoke-test bundled Liblouis runtime
+      - name: Smoke-test bundled Liblouis runtime and tactile exports
         run: >
           uv run --frozen python -m tools.braille_smoke
           dist/Powercalc

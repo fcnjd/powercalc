@@ -46,6 +46,7 @@ Python version according to `pyproject.toml`:
 
 Current runtime dependencies:
 
+- `matplotlib` — headless SVG/PNG rendering for tactile function plots
 - `wxPython` — native desktop GUI
 - `sympy` — mathematical and symbolic engine
 - `platformdirs` — platform-specific locations for settings, history, and
@@ -75,14 +76,17 @@ powercalc/
 	settings.py
 	core/
 		__init__.py
+		braille.py
 		calculator.py
 		catalog.py
+		tactile_plot.py
 	gui/
 		__init__.py
 		app.py
 		formatting.py
 		index_dialog.py
 		main_window.py
+		tactile_plot_dialog.py
 	i18n/
 		__init__.py
 	locale/
@@ -467,3 +471,18 @@ Update this file when any of the following change:
 - parser or mathematics strategy
 - public Core API contracts
 - workflow rules for future agents or contributors
+
+## Tactile plot series
+
+The tactile export request accepts a first expression plus up to five
+`PlotFunction` entries (six curves total). Each expression uses the restricted
+calculator parser independently. Fields and validation errors use `f(x)`
+through `k(x)`; empty legend names fall back to those names. The notebook
+cycles six styles without imposing a maximum, but the application caps
+functions at six to avoid repeated styles and crowded legends.
+Both profiles use monochrome, profile-specific dash/marker cycles; SVG versus
+PNG remains independent of the content profile. ISO A3, A4 and A5 are
+available in landscape and portrait orientations; A4 landscape remains the
+default. A3 dimensions are 420 × 297 mm landscape and 297 × 420 mm portrait. The native dialog provides
+Add/Remove function controls with labelled fields. See
+`docs/plans/tactile-plot-v2.md` for UX and acceptance criteria.
